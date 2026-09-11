@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from app.infrastructure.supabase import get_supabase_client
 
 app = FastAPI(
     title="Data-Driven Brasileirão Insights API",
@@ -18,3 +19,18 @@ async def health_check():
         "service": "dbi-api",
         "version": "0.1.0",
     }
+
+
+@app.get("/health/supabase")
+async def health_check_supabase():
+    try:
+        client = get_supabase_client()
+        return {
+            "status": "ok",
+            "supabase_url_configured": bool(client),
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "detail": str(e),
+        }

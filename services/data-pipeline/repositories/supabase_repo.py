@@ -115,3 +115,56 @@ def upsert_standings_entry(
         payload,
         on_conflict="competition_id,group_id,team_id",
     ).execute()
+
+
+def upsert_round(
+    *,
+    competition_id: str,
+    group_id: str | None,
+    round_data: dict[str, Any],
+) -> str:
+    """Upsert em `rounds` por (competition_id, group_id, number). Retorna o id (UUID)."""
+    client = get_supabase_client()
+
+    payload = {
+        "competition_id": competition_id,
+        "group_id": group_id,
+        "external_id": round_data["external_id"],
+        "number": round_data["number"],
+        "total": round_data["total"],
+        "label": round_data["label"],
+    }
+
+    result = (
+        client.table("rounds")
+        .upsert(payload, on_conflict="competition_id,group_id,number")
+        .execute()
+    )
+    return result.data[0]["id"]
+
+
+def upsert_match(
+    *,
+    match_data: dict[str, Any],
+    competition_id: str,
+    round_id: str,
+    home_team_id: str,
+    away_team_id: str,
+) -> str:
+    """Upsert em `matches` por (provider, external_id). Retorna o id (UUID)."""
+    client = get_supabase_client()
+
+    payload = {
+        **match_data,
+        "competition_id": competition_id,
+        "round_id": round_id,
+        "home_team_id": home_team_id,
+        "away_team_id": away_team_id,
+    }
+
+    result = (
+        client.table("matches")
+        .upsert(payload, on_conflict="provider,external_id")
+        .execute()
+    )
+    return result.data[0]["id"]

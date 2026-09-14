@@ -153,3 +153,54 @@ def normalize_standings_entries(
             )
 
     return entries
+
+
+def normalize_round(round_obj: dict[str, Any]) -> dict[str, Any]:
+    """
+    Recebe um objeto de round (de dentro de getRounds()) e retorna
+    o dict pronto para upsert em `rounds`.
+
+    round_obj["number"] pode ser None em fases sem numeração de
+    rodada tradicional (ex: mata-mata) — quem chama deve verificar
+    isso antes de tentar persistir, já que `number` é NOT NULL no
+    schema.
+    """
+    return {
+        "external_id": str(round_obj["id"]) if round_obj.get("id") is not None else None,
+        "number": round_obj.get("number"),
+        "total": round_obj.get("total"),
+        "label": round_obj.get("label"),
+    }
+
+
+def normalize_match(match_raw: dict[str, Any]) -> dict[str, Any]:
+    """
+    Recebe um objeto de partida (de dentro de round["matches"]) e
+    retorna o dict pronto para upsert em `matches`.
+
+    Nota: o formato exato de `score.penalties` ainda não foi
+    observado com valor não-nulo na fonte real. Por isso
+    penalties_home/penalties_away ficam None por enquanto — não
+    inventamos um parsing sem confirmar o formato real primeiro.
+    """
+    score = match_raw.get("score") or {}
+    coverage = match_raw.get("coverage") or {}
+
+    return {
+        "provider": PROVIDER,
+        "external_id": str(match_raw["id"]),
+        "date_time": match_raw.get("dateTime"),
+        "match_date": match_raw.get("date"),
+        "match_time": match_raw.get("time"),
+        "venue": match_raw.get("venue"),
+        "started": match_raw.get("started", False),
+        "status": match_raw.get("status"),
+        "status_code": match_raw.get("statusCode"),
+        "home_score": score.get("home"),
+        "away_score": score.get("away"),
+        "penalties_home": None,
+        "penalties_away": None,
+        "coverage_label": coverage.get("label"),
+        "coverage_url": coverage.get("url"),
+        "coverage_status_code": coverage.get("statusCode"),
+    }

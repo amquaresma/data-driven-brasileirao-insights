@@ -1,0 +1,9 @@
+{
+  "name": "brasileirao-source-cli",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Wrapper local do pacote campeonato-brasileiro-api, consumido via subprocess pelo pipeline Python.",
+  "dependencies": {
+    "campeonato-brasileiro-api": "github:ezefranca/campeonato-brasileiro-api"
+  }
+}

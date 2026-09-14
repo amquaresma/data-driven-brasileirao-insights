@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.infrastructure.supabase import get_supabase_client
+from app.api.routes import competitions, teams
 
 app = FastAPI(
     title="Data-Driven Brasileirão Insights API",
@@ -10,6 +11,9 @@ app = FastAPI(
     ),
     version="0.1.0",
 )
+
+app.include_router(competitions.router)
+app.include_router(teams.router)
 
 
 @app.get("/health")

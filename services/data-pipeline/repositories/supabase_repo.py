@@ -26,6 +26,24 @@ def upsert_competition(competition: dict[str, Any]) -> str:
     return result.data[0]["id"]
 
 
+def upsert_group(competition_id: str, external_id: str, name: str) -> str:
+    """Upsert em `groups` por (competition_id, external_id). Retorna o id (UUID)."""
+    client = get_supabase_client()
+
+    payload = {
+        "competition_id": competition_id,
+        "external_id": external_id,
+        "name": name,
+    }
+
+    result = (
+        client.table("groups")
+        .upsert(payload, on_conflict="competition_id,external_id")
+        .execute()
+    )
+    return result.data[0]["id"]
+
+
 def upsert_team(team_data: dict[str, Any], external_id_data: dict[str, Any]) -> str:
     """
     Upsert de time + reconciliação de external_id.

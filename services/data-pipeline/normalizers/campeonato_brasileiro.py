@@ -66,6 +66,35 @@ def normalize_team(team: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]
     return team_data, external_id_data
 
 
+def normalize_groups(standings_payload: dict[str, Any]) -> list[dict[str, Any]]:
+    """
+    Recebe o payload completo de getStandings()/getCompetition() e
+    retorna a lista de grupos reais presentes nas tabelas, quando a
+    competição estiver na fase agrupada (`grouped: true`).
+
+    Importante: "agrupado" não é uma propriedade fixa de uma série
+    (ex: Série D) — é um estado da fase atual da competição, que
+    qualquer série pode assumir (confirmado: Série C também aparece
+    agrupada em quadrangulares). Quando `grouped` é False, a tabela
+    tem id='overall' (string), que não representa um grupo real —
+    por isso só tratamos como grupo quando `grouped` é True.
+
+    Cada item retornado: {"external_id": str, "name": str}
+    """
+    if not standings_payload.get("grouped"):
+        return []
+
+    groups: list[dict[str, Any]] = []
+    for table in standings_payload.get("tables", []):
+        groups.append(
+            {
+                "external_id": str(table["id"]),
+                "name": table.get("name") or f"Grupo {table['id']}",
+            }
+        )
+    return groups
+
+
 def normalize_standings_entries(
     standings_payload: dict[str, Any],
 ) -> list[dict[str, Any]]:
@@ -76,19 +105,27 @@ def normalize_standings_entries(
     interno acontece na camada de persistência, depois do upsert
     de teams/team_external_ids).
 
+    Quando a competição está agrupada (`grouped: true`), cada entry
+    carrega também `group_external_id`, usado depois para resolver
+    o group_id (UUID interno) já upsertado via normalize_groups().
+    Quando não agrupada, `group_external_id` vem como None.
+
     Cada item retornado tem o formato:
     {
         "table_name": str,
+        "group_external_id": str | None,
         "team": {...},              # objeto team cru da fonte
         "position": int,
         "points": int | None,
         ...
     }
     """
+    is_grouped = bool(standings_payload.get("grouped"))
     entries: list[dict[str, Any]] = []
 
     for table in standings_payload.get("tables", []):
         table_name = table.get("name")
+        group_external_id = str(table["id"]) if is_grouped else None
 
         for entry in table.get("entries", []):
             legend = entry.get("legend") or {}
@@ -96,6 +133,7 @@ def normalize_standings_entries(
             entries.append(
                 {
                     "table_name": table_name,
+                    "group_external_id": group_external_id,
                     "team": entry["team"],
                     "position": entry["position"],
                     "points": entry.get("points"),

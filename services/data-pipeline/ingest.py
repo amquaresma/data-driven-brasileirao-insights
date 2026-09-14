@@ -18,10 +18,12 @@ from sources.exceptions import BrasileiraoSourceError
 from normalizers.campeonato_brasileiro import (
     normalize_competition,
     normalize_team,
+    normalize_groups,
     normalize_standings_entries,
 )
 from repositories.supabase_repo import (
     upsert_competition,
+    upsert_group,
     upsert_team,
     upsert_standings_entry,
 )
@@ -35,6 +37,16 @@ def ingest_standings(serie: Serie, *, group: str | None = None) -> None:
     competition = normalize_competition(raw)
     competition_id = upsert_competition(competition)
     print(f"  Competição: {competition['name']} -> {competition_id}")
+    print(f"  Agrupada (fase atual): {competition['grouped']}")
+
+    # Resolve grupos ANTES das entries, para termos o mapeamento
+    # external_id -> group_id (UUID interno) pronto.
+    groups = normalize_groups(raw)
+    group_id_by_external_id: dict[str, str] = {}
+    for grp in groups:
+        group_id = upsert_group(competition_id, grp["external_id"], grp["name"])
+        group_id_by_external_id[grp["external_id"]] = group_id
+        print(f"  Grupo: {grp['name']} -> {group_id}")
 
     entries = normalize_standings_entries(raw)
     print(f"  {len(entries)} entradas de classificação encontradas.")
@@ -43,16 +55,18 @@ def ingest_standings(serie: Serie, *, group: str | None = None) -> None:
         team_data, external_id_data = normalize_team(entry["team"])
         team_id = upsert_team(team_data, external_id_data)
 
-        # group_id ainda não é resolvido aqui — Etapa 4.2 seguinte
-        # (grupos da Série D). Por enquanto, None para competições
-        # sem grupo, que é o caso já validado (Série A).
+        group_id = None
+        if entry["group_external_id"] is not None:
+            group_id = group_id_by_external_id.get(entry["group_external_id"])
+
         upsert_standings_entry(
             competition_id=competition_id,
             team_id=team_id,
-            group_id=None,
+            group_id=group_id,
             entry=entry,
         )
-        print(f"    [{entry['position']:>2}] {team_data['name']:<20} {entry['points']} pts")
+        group_label = f" ({entry['table_name']})" if entry["group_external_id"] else ""
+        print(f"    [{entry['position']:>2}] {team_data['name']:<20} {entry['points']} pts{group_label}")
 
     print("Ingestão concluída com sucesso.")
 

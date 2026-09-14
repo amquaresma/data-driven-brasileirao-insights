@@ -113,7 +113,7 @@ def upsert_standings_entry(
 
     client.table("standings_entries").upsert(
         payload,
-        on_conflict="competition_id,group_id,team_id",
+        on_conflict="competition_id,team_id",
     ).execute()
 
 

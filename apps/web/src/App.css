@@ -108,3 +108,30 @@ header p {
 .form-L {
   background: #c0392b;
 }
+
+.charts-section {
+  margin-top: 3rem;
+}
+
+.charts-section h2 {
+  margin-bottom: 1rem;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+}
+
+.chart-card {
+  background: #1a1a1a11;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.chart-card h3 {
+  font-size: 0.95rem;
+  margin: 0 0 1rem 0;
+  color: #aaa;
+}

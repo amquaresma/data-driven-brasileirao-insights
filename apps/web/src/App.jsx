@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import {
+  GoalsChart,
+  EfficiencyChart,
+  GoalDifferenceChart,
+  ResultsDistributionChart,
+} from "./components/StandingsCharts";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -37,46 +43,8 @@ function ApiStatus() {
   );
 }
 
-function StandingsTable({ serie }) {
-  const [entries, setEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchStandings() {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(
-          `${API_URL}/competitions/${serie}/standings`,
-        );
-        if (!response.ok) throw new Error("Não foi possível carregar a classificação.");
-        const data = await response.json();
-        if (!cancelled) setEntries(data);
-      } catch (err) {
-        if (!cancelled) setError(err.message);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    fetchStandings();
-    return () => {
-      cancelled = true;
-    };
-  }, [serie]);
-
-  if (loading) return <p className="state-message">Carregando classificação...</p>;
-  if (error) return <p className="state-message error">{error}</p>;
-  if (entries.length === 0)
-    return (
-      <p className="state-message">
-        Nenhuma classificação disponível no momento (a competição pode estar
-        em fase de mata-mata).
-      </p>
-    );
+function StandingsTable({ entries }) {
+  if (entries.length === 0) return null;
 
   const hasGroups = entries.some((e) => e.group_name);
 
@@ -137,6 +105,64 @@ function StandingsTable({ serie }) {
   );
 }
 
+function SeriesView({ serie }) {
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchStandings() {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(
+          `${API_URL}/competitions/${serie}/standings`,
+        );
+        if (!response.ok) throw new Error("Não foi possível carregar a classificação.");
+        const data = await response.json();
+        if (!cancelled) setEntries(data);
+      } catch (err) {
+        if (!cancelled) setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchStandings();
+    return () => {
+      cancelled = true;
+    };
+  }, [serie]);
+
+  if (loading) return <p className="state-message">Carregando classificação...</p>;
+  if (error) return <p className="state-message error">{error}</p>;
+  if (entries.length === 0)
+    return (
+      <p className="state-message">
+        Nenhuma classificação disponível no momento (a competição pode estar
+        em fase de mata-mata).
+      </p>
+    );
+
+  return (
+    <>
+      <StandingsTable entries={entries} />
+
+      <section className="charts-section">
+        <h2>Análises</h2>
+        <div className="charts-grid">
+          <GoalsChart entries={entries} />
+          <EfficiencyChart entries={entries} />
+          <GoalDifferenceChart entries={entries} />
+          <ResultsDistributionChart entries={entries} />
+        </div>
+      </section>
+    </>
+  );
+}
+
 function App() {
   const [serie, setSerie] = useState("a");
 
@@ -163,9 +189,7 @@ function App() {
         ))}
       </nav>
 
-      <section>
-        <StandingsTable serie={serie} />
-      </section>
+      <SeriesView serie={serie} />
     </main>
   );
 }

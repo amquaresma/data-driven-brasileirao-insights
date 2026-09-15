@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.infrastructure.supabase import get_supabase_client
 from app.api.routes import competitions, teams
@@ -10,6 +11,16 @@ app = FastAPI(
         "e Machine Learning aplicado ao futebol brasileiro."
     ),
     version="0.1.0",
+)
+
+# CORS liberado para qualquer origem em desenvolvimento. Em produção,
+# isso deve ser restrito ao(s) domínio(s) real(is) do frontend.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(competitions.router)

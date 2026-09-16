@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     supabase_url: str
     supabase_service_role_key: str
 
+    highlightly_api_key: str
+    highlightly_base_url: str = "https://soccer.highlightly.net"
+
 
 @lru_cache
 def get_settings() -> Settings:

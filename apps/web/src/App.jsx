@@ -6,6 +6,7 @@ import {
   GoalDifferenceChart,
   ResultsDistributionChart,
 } from "./components/StandingsCharts";
+import { MatchesList } from "./components/MatchesList";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -105,7 +106,7 @@ function StandingsTable({ entries }) {
   );
 }
 
-function SeriesView({ serie }) {
+function StandingsView({ serie }) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -159,6 +160,70 @@ function SeriesView({ serie }) {
           <ResultsDistributionChart entries={entries} />
         </div>
       </section>
+    </>
+  );
+}
+
+function MatchesView({ serie }) {
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchMatches() {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`${API_URL}/competitions/${serie}/matches`);
+        if (!response.ok) throw new Error("Não foi possível carregar as partidas.");
+        const data = await response.json();
+        if (!cancelled) setMatches(data);
+      } catch (err) {
+        if (!cancelled) setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchMatches();
+    return () => {
+      cancelled = true;
+    };
+  }, [serie]);
+
+  if (loading) return <p className="state-message">Carregando partidas...</p>;
+  if (error) return <p className="state-message error">{error}</p>;
+
+  return <MatchesList matches={matches} />;
+}
+
+function SeriesView({ serie }) {
+  const [view, setView] = useState("standings");
+
+  return (
+    <>
+      <nav className="view-tabs">
+        <button
+          className={view === "standings" ? "active" : ""}
+          onClick={() => setView("standings")}
+        >
+          Classificação
+        </button>
+        <button
+          className={view === "matches" ? "active" : ""}
+          onClick={() => setView("matches")}
+        >
+          Partidas
+        </button>
+      </nav>
+
+      {view === "standings" ? (
+        <StandingsView serie={serie} />
+      ) : (
+        <MatchesView serie={serie} />
+      )}
     </>
   );
 }

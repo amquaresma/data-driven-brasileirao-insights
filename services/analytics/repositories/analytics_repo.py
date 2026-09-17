@@ -74,3 +74,66 @@ def upsert_streaks(competition_id: str, team_id: str, streaks: dict) -> None:
         },
         on_conflict="competition_id,team_id",
     ).execute()
+
+
+def upsert_volatility(competition_id: str, team_id: str, volatility: dict) -> None:
+    if volatility["matches_considered"] < 2:
+        return
+
+    client = get_supabase_client()
+    client.table("team_volatility").upsert(
+        {
+            "competition_id": competition_id,
+            "team_id": team_id,
+            **volatility,
+        },
+        on_conflict="competition_id,team_id",
+    ).execute()
+
+
+def upsert_momentum(competition_id: str, team_id: str, momentum: dict, weighted_form_score: float | None) -> None:
+    if momentum["momentum_score"] is None:
+        return
+
+    client = get_supabase_client()
+    client.table("team_momentum").upsert(
+        {
+            "competition_id": competition_id,
+            "team_id": team_id,
+            **momentum,
+            "weighted_form_score": weighted_form_score,
+        },
+        on_conflict="competition_id,team_id",
+    ).execute()
+
+
+def get_all_finished_matches_for_elo(competition_id: str) -> list[dict]:
+    """Todas as partidas finalizadas da competição, para cálculo de Elo global."""
+    client = get_supabase_client()
+    result = (
+        client.table("matches")
+        .select("home_team_id, away_team_id, home_score, away_score, match_date, status")
+        .eq("competition_id", competition_id)
+        .not_.is_("home_score", "null")
+        .not_.is_("away_score", "null")
+        .execute()
+    )
+    return [
+        m for m in result.data
+        if m["status"] and ("Finish" in m["status"] or m["status"] == "finished")
+    ]
+
+
+def upsert_elo_ratings(competition_id: str, ratings: dict[str, dict]) -> None:
+    client = get_supabase_client()
+    rows = [
+        {
+            "competition_id": competition_id,
+            "team_id": team_id,
+            "rating": data["rating"],
+            "matches_considered": data["matches_considered"],
+        }
+        for team_id, data in ratings.items()
+    ]
+    if rows:
+        client.table("team_elo_ratings").upsert(rows, on_conflict="competition_id,team_id").execute()

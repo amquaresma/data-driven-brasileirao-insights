@@ -262,3 +262,64 @@ def insert_match_events(
     if rows:
         client.table("match_events").insert(rows).execute()
     return len(rows)
+
+
+def resolve_or_create_player(highlightly_player_id: int, name: str, full_name: str | None, position: str | None) -> str:
+    """
+    Busca o player_id interno pelo external_id da Highlightly. Cria o
+    jogador (e seu external_id) se ainda não existir.
+    """
+    client = get_supabase_client()
+
+    existing = (
+        client.table("player_external_ids")
+        .select("player_id")
+        .eq("provider", PROVIDER)
+        .eq("external_id", str(highlightly_player_id))
+        .limit(1)
+        .execute()
+    )
+    if existing.data:
+        return existing.data[0]["player_id"]
+
+    player_result = (
+        client.table("players")
+        .insert({"name": name, "full_name": full_name, "position": position})
+        .execute()
+    )
+    player_id = player_result.data[0]["id"]
+
+    client.table("player_external_ids").insert(
+        {"player_id": player_id, "provider": PROVIDER, "external_id": str(highlightly_player_id)}
+    ).execute()
+
+    return player_id
+
+
+def insert_player_match_statistics(
+    match_id: str, team_id_map: dict[str, str], rows: list[dict[str, Any]]
+) -> int:
+    client = get_supabase_client()
+    payloads = []
+
+    for row in rows:
+        team_id = team_id_map.get(str(row["highlightly_team_id"]))
+        if team_id is None:
+            continue
+
+        player_id = resolve_or_create_player(
+            row["highlightly_player_id"], row["player_name"], row["player_full_name"], row["position"]
+        )
+
+        payload = {k: v for k, v in row.items() if not k.startswith("highlightly_") and k not in ("player_name", "player_full_name")}
+        payload["match_id"] = match_id
+        payload["player_id"] = player_id
+        payload["team_id"] = team_id
+        payloads.append(payload)
+
+    if payloads:
+        client.table("player_match_statistics").upsert(
+            payloads, on_conflict="match_id,player_id"
+        ).execute()
+
+    return len(payloads)

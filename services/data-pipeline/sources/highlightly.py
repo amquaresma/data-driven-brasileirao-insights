@@ -128,3 +128,9 @@ def get_match_detail(highlightly_match_id: int) -> dict[str, Any]:
             )
         return result[0]
     return result
+
+
+def get_box_score(highlightly_match_id: int) -> list[dict[str, Any]]:
+    """Retorna o box score (estatísticas por jogador) de uma partida."""
+    result = _get(f"/box-score/{highlightly_match_id}")
+    return result if isinstance(result, list) else result.get("data", [])

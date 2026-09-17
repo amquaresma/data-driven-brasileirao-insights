@@ -130,3 +130,94 @@ def normalize_match_events(match_detail: dict[str, Any]) -> list[dict[str, Any]]
         )
 
     return events
+
+
+def _parse_percentage(value: str | None) -> float | None:
+    """Converte "78.57 %" em 78.57. Retorna None se vazio/inválido."""
+    if not value:
+        return None
+    try:
+        return float(value.replace("%", "").strip())
+    except ValueError:
+        return None
+
+
+def _parse_rating(value: str | None) -> float | None:
+    """Converte "6.90" em 6.9. Retorna None se vazio/inválido."""
+    if not value:
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+
+def normalize_player_box_score(match_detail_box_score: list[dict]) -> list[dict]:
+    """
+    Recebe a resposta de /box-score/{matchId} (lista de blocos por
+    time) e retorna uma lista achatada de dicts, um por jogador,
+    prontos para persistência em player_match_statistics.
+    """
+    rows: list[dict] = []
+
+    for team_block in match_detail_box_score:
+        highlightly_team_id = team_block["team"]["id"]
+
+        for player in team_block.get("players", []):
+            stats_list = player.get("statistics") or [{}]
+            stats = stats_list[0] if stats_list else {}
+
+            rows.append(
+                {
+                    "highlightly_team_id": highlightly_team_id,
+                    "highlightly_player_id": player["id"],
+                    "player_name": player["name"],
+                    "player_full_name": player.get("fullName"),
+                    "position": player.get("position"),
+                    "shirt_number": player.get("shirtNumber"),
+                    "is_captain": player.get("isCaptain"),
+                    "is_substitute": player.get("isSubstitute"),
+                    "minutes_played": player.get("minutesPlayed"),
+                    "match_rating": _parse_rating(player.get("matchRating")),
+                    "offsides": player.get("offsides"),
+                    "goals_scored": stats.get("goalsScored"),
+                    "goals_saved": stats.get("goalsSaved"),
+                    "goals_conceded": stats.get("goalsConceded"),
+                    "assists": stats.get("assists"),
+                    "dribbles_total": stats.get("dribblesTotal"),
+                    "dribbles_successful": stats.get("dribblesSuccessful"),
+                    "dribbles_failed": stats.get("dribblesFailed"),
+                    "dribble_success_rate": _parse_percentage(stats.get("dribbleSuccessRate")),
+                    "fouled_by_others": stats.get("fouledByOthers"),
+                    "fouled_others": stats.get("fouledOthers"),
+                    "tackles_total": stats.get("tacklesTotal"),
+                    "interceptions_total": stats.get("interceptionsTotal"),
+                    "duels_total": stats.get("duelsTotal"),
+                    "duels_won": stats.get("duelsWon"),
+                    "duels_lost": stats.get("duelsLost"),
+                    "duel_success_rate": _parse_percentage(stats.get("duelSuccessRate")),
+                    "cards_red": stats.get("cardsRed"),
+                    "cards_yellow": stats.get("cardsYellow"),
+                    "cards_second_yellow": stats.get("cardsSecondYellow"),
+                    "passes_accuracy": _parse_percentage(stats.get("passesAccuracy")),
+                    "passes_successful": stats.get("passesSuccessful"),
+                    "passes_failed": stats.get("passesFailed"),
+                    "passes_total": stats.get("passesTotal"),
+                    "passes_key": stats.get("passesKey"),
+                    "penalties_scored": stats.get("penaltiesScored"),
+                    "penalties_missed": stats.get("penaltiesMissed"),
+                    "penalties_total": stats.get("penaltiesTotal"),
+                    "penalties_accuracy": _parse_percentage(stats.get("penaltiesAccuracy")),
+                    "shots_on_target": stats.get("shotsOnTarget"),
+                    "shots_off_target": stats.get("shotsOffTarget"),
+                    "shots_total": stats.get("shotsTotal"),
+                    "shots_accuracy": _parse_percentage(stats.get("shotsAccuracy")),
+                    "expected_goals": stats.get("expectedGoals"),
+                    "expected_assists": stats.get("expectedAssists"),
+                    "expected_goals_on_target": stats.get("expectedGoalsOnTarget"),
+                    "expected_goals_on_target_conceded": stats.get("expectedGoalsOnTargetConceded"),
+                    "expected_goals_prevented": stats.get("expectedGoalsPrevented"),
+                }
+            )
+
+    return rows

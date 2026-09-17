@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 from app.infrastructure.supabase import get_supabase_client
 from app.schemas.competition import CompetitionOut
 from app.schemas.match import MatchOut
+from app.schemas.match_detail import MatchDetailOut
 from app.schemas.standings import StandingsEntryOut
 from app.schemas.team import TeamOut
 
@@ -103,3 +104,58 @@ def get_matches(code: str, round_number: int | None = None):
         matches = [m for m in matches if (m.get("round") or {}).get("number") == round_number]
 
     return matches
+
+
+@router.get("/matches/{match_id}/detail", response_model=MatchDetailOut)
+def get_match_detail(match_id: str):
+    """
+    Retorna o detalhe completo de uma partida: dados básicos,
+    estatísticas por time (quando disponíveis via Highlightly) e
+    eventos (gols, cartões, substituições).
+    """
+    client = get_supabase_client()
+
+    match_result = (
+        client.table("matches")
+        .select(
+            "*, "
+            "home_team:teams!matches_home_team_id_fkey(*), "
+            "away_team:teams!matches_away_team_id_fkey(*)"
+        )
+        .eq("id", match_id)
+        .limit(1)
+        .execute()
+    )
+    if not match_result.data:
+        raise HTTPException(status_code=404, detail="Partida não encontrada.")
+
+    match = match_result.data[0]
+
+    stats_result = (
+        client.table("match_statistics")
+        .select("stat_name, stat_value, team:teams(*)")
+        .eq("match_id", match_id)
+        .execute()
+    )
+
+    stats_by_team: dict[str, dict] = {}
+    for row in stats_result.data:
+        team = row["team"]
+        team_id = team["id"]
+        if team_id not in stats_by_team:
+            stats_by_team[team_id] = {"team": team, "statistics": []}
+        stats_by_team[team_id]["statistics"].append(
+            {"stat_name": row["stat_name"], "stat_value": row["stat_value"]}
+        )
+
+    events_result = (
+        client.table("match_events")
+        .select("minute, event_type, team_id, player_name, assisting_player_name, substituted_player_name")
+        .eq("match_id", match_id)
+        .execute()
+    )
+
+    match["statistics"] = list(stats_by_team.values())
+    match["events"] = events_result.data
+
+    return match

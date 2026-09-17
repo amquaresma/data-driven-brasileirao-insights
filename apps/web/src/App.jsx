@@ -7,6 +7,7 @@ import {
   ResultsDistributionChart,
 } from "./components/StandingsCharts";
 import { MatchesList } from "./components/MatchesList";
+import { MatchDetail } from "./components/MatchDetail";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -17,23 +18,81 @@ const SERIES = [
   { code: "d", label: "Série D" },
 ];
 
+const VIEWS = [
+  { key: "standings", label: "Classificação" },
+  { key: "matches", label: "Partidas" },
+  { key: "analytics", label: "Análises" },
+];
+
+function useStandings(serie) {
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    fetch(`${API_URL}/competitions/${serie}/standings`)
+      .then((r) => {
+        if (!r.ok) throw new Error("Não foi possível carregar a classificação.");
+        return r.json();
+      })
+      .then((data) => !cancelled && setEntries(data))
+      .catch((err) => !cancelled && setError(err.message))
+      .finally(() => !cancelled && setLoading(false));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [serie]);
+
+  return { entries, loading, error };
+}
+
+function useMatches(serie) {
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    fetch(`${API_URL}/competitions/${serie}/matches`)
+      .then((r) => {
+        if (!r.ok) throw new Error("Não foi possível carregar as partidas.");
+        return r.json();
+      })
+      .then((data) => !cancelled && setMatches(data))
+      .catch((err) => !cancelled && setError(err.message))
+      .finally(() => !cancelled && setLoading(false));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [serie]);
+
+  return { matches, loading, error };
+}
+
 function ApiStatus() {
   const [status, setStatus] = useState("Verificando API...");
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function checkApi() {
-      try {
-        const response = await fetch(`${API_URL}/health`);
-        if (!response.ok) throw new Error("A API retornou um erro.");
-        const data = await response.json();
-        setStatus(`${data.service} online — versão ${data.version}`);
-      } catch (err) {
+    fetch(`${API_URL}/health`)
+      .then((r) => {
+        if (!r.ok) throw new Error("A API retornou um erro.");
+        return r.json();
+      })
+      .then((data) => setStatus(`API online — v${data.version}`))
+      .catch((err) => {
         setError(err.message);
         setStatus("API indisponível");
-      }
-    }
-    checkApi();
+      });
   }, []);
 
   return (
@@ -44,8 +103,18 @@ function ApiStatus() {
   );
 }
 
-function StandingsTable({ entries }) {
-  if (entries.length === 0) return null;
+function StandingsView({ serie }) {
+  const { entries, loading, error } = useStandings(serie);
+
+  if (loading) return <p className="state-message">Carregando classificação...</p>;
+  if (error) return <p className="state-message error">{error}</p>;
+  if (entries.length === 0)
+    return (
+      <p className="state-message">
+        Nenhuma classificação disponível no momento (a competição pode estar
+        em fase de mata-mata).
+      </p>
+    );
 
   const hasGroups = entries.some((e) => e.group_name);
 
@@ -55,7 +124,7 @@ function StandingsTable({ entries }) {
         <tr>
           <th>#</th>
           {hasGroups && <th>Grupo</th>}
-          <th>Time</th>
+          <th style={{ textAlign: "left" }}>Time</th>
           <th>P</th>
           <th>J</th>
           <th>V</th>
@@ -74,13 +143,7 @@ function StandingsTable({ entries }) {
             {hasGroups && <td>{entry.group_name}</td>}
             <td className="team-cell">
               {entry.team.badge_url && (
-                <img
-                  src={entry.team.badge_url}
-                  alt=""
-                  width="20"
-                  height="20"
-                  loading="lazy"
-                />
+                <img src={entry.team.badge_url} alt="" width="20" height="20" loading="lazy" />
               )}
               {entry.team.name}
             </td>
@@ -106,156 +169,97 @@ function StandingsTable({ entries }) {
   );
 }
 
-function StandingsView({ serie }) {
-  const [entries, setEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+function AnalyticsView({ serie }) {
+  const { entries, loading, error } = useStandings(serie);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchStandings() {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(
-          `${API_URL}/competitions/${serie}/standings`,
-        );
-        if (!response.ok) throw new Error("Não foi possível carregar a classificação.");
-        const data = await response.json();
-        if (!cancelled) setEntries(data);
-      } catch (err) {
-        if (!cancelled) setError(err.message);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    fetchStandings();
-    return () => {
-      cancelled = true;
-    };
-  }, [serie]);
-
-  if (loading) return <p className="state-message">Carregando classificação...</p>;
+  if (loading) return <p className="state-message">Carregando análises...</p>;
   if (error) return <p className="state-message error">{error}</p>;
   if (entries.length === 0)
-    return (
-      <p className="state-message">
-        Nenhuma classificação disponível no momento (a competição pode estar
-        em fase de mata-mata).
-      </p>
-    );
+    return <p className="state-message">Sem dados suficientes para análise no momento.</p>;
 
   return (
-    <>
-      <StandingsTable entries={entries} />
-
-      <section className="charts-section">
-        <h2>Análises</h2>
-        <div className="charts-grid">
-          <GoalsChart entries={entries} />
-          <EfficiencyChart entries={entries} />
-          <GoalDifferenceChart entries={entries} />
-          <ResultsDistributionChart entries={entries} />
-        </div>
-      </section>
-    </>
+    <div className="charts-grid">
+      <GoalsChart entries={entries} />
+      <EfficiencyChart entries={entries} />
+      <GoalDifferenceChart entries={entries} />
+      <ResultsDistributionChart entries={entries} />
+    </div>
   );
 }
 
 function MatchesView({ serie }) {
-  const [matches, setMatches] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { matches, loading, error } = useMatches(serie);
+  const [selectedMatchId, setSelectedMatchId] = useState(null);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchMatches() {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(`${API_URL}/competitions/${serie}/matches`);
-        if (!response.ok) throw new Error("Não foi possível carregar as partidas.");
-        const data = await response.json();
-        if (!cancelled) setMatches(data);
-      } catch (err) {
-        if (!cancelled) setError(err.message);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    fetchMatches();
-    return () => {
-      cancelled = true;
-    };
-  }, [serie]);
+  if (selectedMatchId) {
+    return <MatchDetail matchId={selectedMatchId} onBack={() => setSelectedMatchId(null)} />;
+  }
 
   if (loading) return <p className="state-message">Carregando partidas...</p>;
   if (error) return <p className="state-message error">{error}</p>;
 
-  return <MatchesList matches={matches} />;
-}
-
-function SeriesView({ serie }) {
-  const [view, setView] = useState("standings");
-
-  return (
-    <>
-      <nav className="view-tabs">
-        <button
-          className={view === "standings" ? "active" : ""}
-          onClick={() => setView("standings")}
-        >
-          Classificação
-        </button>
-        <button
-          className={view === "matches" ? "active" : ""}
-          onClick={() => setView("matches")}
-        >
-          Partidas
-        </button>
-      </nav>
-
-      {view === "standings" ? (
-        <StandingsView serie={serie} />
-      ) : (
-        <MatchesView serie={serie} />
-      )}
-    </>
-  );
+  return <MatchesList matches={matches} onSelectMatch={setSelectedMatchId} />;
 }
 
 function App() {
   const [serie, setSerie] = useState("a");
+  const [view, setView] = useState("standings");
+
+  const currentSerieLabel = SERIES.find((s) => s.code === serie)?.label;
+  const currentViewLabel = VIEWS.find((v) => v.key === view)?.label;
 
   return (
-    <main>
-      <header>
-        <h1>Data-Driven Brasileirão Insights</h1>
-        <p>
-          Plataforma de análise de dados, estatística e Machine Learning
-          aplicada ao futebol brasileiro.
-        </p>
-        <ApiStatus />
-      </header>
+    <div className="app-shell">
+      <aside className="sidebar">
+        <div className="sidebar-brand">
+          <h1>Brasileirão Insights</h1>
+          <span>Data-driven football analytics</span>
+        </div>
 
-      <nav className="series-tabs">
-        {SERIES.map((s) => (
-          <button
-            key={s.code}
-            className={s.code === serie ? "active" : ""}
-            onClick={() => setSerie(s.code)}
-          >
-            {s.label}
-          </button>
-        ))}
-      </nav>
+        <div>
+          <div className="sidebar-section-label">Competições</div>
+          <nav className="sidebar-nav">
+            {SERIES.map((s) => (
+              <button
+                key={s.code}
+                className={`sidebar-nav-item ${s.code === serie ? "active" : ""}`}
+                onClick={() => setSerie(s.code)}
+              >
+                {s.label}
+              </button>
+            ))}
+          </nav>
+        </div>
 
-      <SeriesView serie={serie} />
-    </main>
+        <div className="sidebar-footer">
+          <ApiStatus />
+        </div>
+      </aside>
+
+      <main className="main-content">
+        <div className="page-header">
+          <h2>
+            {currentSerieLabel} · {currentViewLabel}
+          </h2>
+        </div>
+
+        <nav className="view-tabs">
+          {VIEWS.map((v) => (
+            <button
+              key={v.key}
+              className={v.key === view ? "active" : ""}
+              onClick={() => setView(v.key)}
+            >
+              {v.label}
+            </button>
+          ))}
+        </nav>
+
+        {view === "standings" && <StandingsView serie={serie} />}
+        {view === "matches" && <MatchesView serie={serie} />}
+        {view === "analytics" && <AnalyticsView serie={serie} />}
+      </main>
+    </div>
   );
 }
 

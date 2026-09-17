@@ -9,11 +9,13 @@ function statusLabel(status) {
     finished: "Encerrado",
     scheduled: "Agendado",
     live: "Ao vivo",
+    Finished: "Encerrado",
+    "Not started": "Agendado",
   };
   return labels[status] || status || "";
 }
 
-export function MatchesList({ matches }) {
+export function MatchesList({ matches, onSelectMatch }) {
   if (matches.length === 0) {
     return <p className="state-message">Nenhuma partida disponível no momento.</p>;
   }
@@ -21,7 +23,11 @@ export function MatchesList({ matches }) {
   return (
     <div className="matches-list">
       {matches.map((match) => (
-        <div key={match.id} className={`match-card status-${match.status}`}>
+        <button
+          key={match.id}
+          className={`match-card status-${match.status} match-card-clickable`}
+          onClick={() => onSelectMatch(match.id)}
+        >
           <div className="match-meta">
             <span>{formatDate(match.match_date)}</span>
             <span>{match.match_time}</span>
@@ -51,7 +57,7 @@ export function MatchesList({ matches }) {
           </div>
 
           {match.venue && <div className="match-venue">{match.venue}</div>}
-        </div>
+        </button>
       ))}
     </div>
   );

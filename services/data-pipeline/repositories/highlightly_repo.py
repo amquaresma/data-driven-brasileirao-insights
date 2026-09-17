@@ -180,13 +180,31 @@ def load_matches_pending_detail(competition_id: str) -> list[tuple[str, str]]:
     )
     match_to_external = {row["match_id"]: row["external_id"] for row in links.data}
 
-    existing_stats = (
-        client.table("match_statistics")
-        .select("match_id")
-        .in_("match_id", list(match_to_external.keys()))
-        .execute()
-    )
-    already_done = {row["match_id"] for row in existing_stats.data}
+    # PostgREST limita a 1000 linhas por resposta por padrão. Como
+    # match_statistics cresce ~50-80 linhas por partida, uma única
+    # chamada .execute() trunca silenciosamente para tabelas grandes,
+    # fazendo esta checagem subestimar quais partidas já foram
+    # processadas (e desperdiçar chamadas à API re-buscando detalhe
+    # de partidas que já tinham stats). Paginamos explicitamente até
+    # esgotar os resultados.
+    match_ids_to_check = list(match_to_external.keys())
+    already_done: set[str] = set()
+    page_size = 1000
+    offset = 0
+    while True:
+        page = (
+            client.table("match_statistics")
+            .select("match_id")
+            .in_("match_id", match_ids_to_check)
+            .range(offset, offset + page_size - 1)
+            .execute()
+        )
+        if not page.data:
+            break
+        already_done.update(row["match_id"] for row in page.data)
+        if len(page.data) < page_size:
+            break
+        offset += page_size
 
     return [
         (match_id, external_id)

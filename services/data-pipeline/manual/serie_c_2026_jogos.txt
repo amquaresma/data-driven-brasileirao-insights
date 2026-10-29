@@ -1,0 +1,30 @@
+[quadrangular-b]
+Floresta 0 x 1 Maringá
+Santa Cruz 1 x 0 Botafogo-PB
+Botafogo-PB 0 x 1 Floresta
+Maringá 0 x 1 Santa Cruz
+Maringá 2 x 0 Botafogo-PB
+Santa Cruz 1 x 0 Floresta
+Botafogo-PB 0 x 0 Maringá
+Floresta 1 x 1 Santa Cruz
+Floresta 1 x 1 Botafogo-PB
+Santa Cruz 1 x 1 Maringá
+Botafogo-PB 1 x 0 Santa Cruz
+Maringá 2 x 0 Floresta
+[quadrangular-c]
+Inter de Limeira 3 x 3 Ferroviária
+Paysandu 1 x 2 Brusque
+Ferroviária 1 x 0 Paysandu
+Brusque 2 x 2 Inter de Limeira
+Ferroviária 3 x 2 Brusque
+Paysandu 2 x 2 Inter de Limeira
+Brusque 1 x 1 Ferroviária
+Inter de Limeira 2 x 0 Paysandu
+Inter de Limeira 2 x 2 Brusque
+Paysandu 1 x 0 Ferroviária
+Brusque 1 x 1 Paysandu
+Ferroviária 2 x 0 Inter de Limeira
+[final|1]
+Maringá 1 x 1 Ferroviária
+[final|2]
+Ferroviária 1 x 2 Maringá

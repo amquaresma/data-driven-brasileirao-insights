@@ -7,6 +7,8 @@ class StandingsEntryOut(BaseModel):
     position: int
     team: TeamOut
     group_name: str | None = None
+    phase_name: str | None = None
+    phase_order: int | None = None
     points: int | None = None
     matches_played: int | None = None
     wins: int | None = None

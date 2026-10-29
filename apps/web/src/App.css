@@ -447,3 +447,70 @@
 .charts-grid {
   grid-template-columns: 1fr;
 }
+
+/* ===== Fases (mata-mata) ===== */
+
+.phase-section { margin-bottom: 2rem; }
+
+.phase-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.score-pens {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* ===== Grupos e confrontos ===== */
+
+.group-block { margin-bottom: 1.5rem; }
+
+.group-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 0 0 0.5rem;
+}
+
+.tie-card { cursor: default; }
+
+.tie-main {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tie-team {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.tie-team.away { justify-content: flex-end; }
+.tie-team.winner { color: var(--accent); font-weight: 700; }
+
+.tie-agg {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 70px;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.tie-legs {
+  margin-top: 0.6rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}

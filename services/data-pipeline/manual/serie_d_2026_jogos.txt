@@ -1,0 +1,142 @@
+[segunda-fase|1]
+América-RJ 1 x 1 XV de Piracicaba
+Vitória-ES 1 x 0 Betim
+São Joseense 0 x 1 Cianorte
+São Luiz 1 x 1 Blumenau
+Fluminense-PI 0 x 3 América-RN
+Ceilândia 1 x 2 Luverdense
+Imperatriz 1 x 1 Maracanã
+Aparecidense 1 x 1 Capital-DF
+Sampaio Corrêa-RJ 1 x 1 Portuguesa
+Monte Roraima 3 x 2 Guaporé
+Mixto-MT 0 x 2 Gama
+Brasiliense 0 x 0 Goiatuba
+Parnahyba 2 x 1 Águia de Marabá
+Central 1 x 1 Ferroviário
+Maguary 2 x 0 Piauí
+Portuguesa-RJ 1 x 1 Noroeste
+Altos 0 x 1 ABC
+Tuna Luso 1 x 2 Iguatu
+Jacuipense 1 x 3 Treze
+CRAC 1 x 0 Tombense
+São José-RS 1 x 1 Santa Catarina
+Cascavel 2 x 2 Marcílio Dias
+Lagarto 1 x 1 CSA
+Serra Branca 2 x 0 Juazeirense
+Ivinhema 3 x 1 Democrata-GV
+Sampaio Corrêa 0 x 2 Trem
+ASA 1 x 1 Sergipe
+Rio Branco-ES 0 x 2 Uberlândia
+Araguaína 0 x 1 Nacional-AM
+Independência-AC 0 x 2 Manauara
+São Raimundo-RR 1 x 1 Porto Velho
+[segunda-fase|2]
+XV de Piracicaba 2 x 0 América-RJ
+Betim 2 x 0 Vitória-ES
+Cianorte 0 (5) x (4) 1 São Joseense
+Blumenau 1 (1) x (3) 1 São Luiz
+América-RN 1 x 0 Fluminense-PI
+Luverdense 1 x 1 Ceilândia
+Maracanã 0 (6) x (7) 0 Imperatriz
+Capital-DF 4 x 0 Aparecidense
+Portuguesa 1 x 0 Sampaio Corrêa-RJ
+Guaporé 2 x 0 Monte Roraima
+Gama 1 x 0 Mixto-MT
+Goiatuba 1 x 0 Brasiliense
+Águia de Marabá 2 x 0 Parnahyba
+Ferroviário 2 x 0 Central
+Piauí 1 x 0 Maguary
+Portuguesa-RJ 3 x 1 Noroeste
+ABC 1 x 1 Altos
+Iguatu 1 x 1 Tuna Luso
+Treze 0 x 0 Jacuipense
+Tombense 0 x 0 CRAC
+São José-RS 1 (4) x (2) 1 Santa Catarina
+Marcílio Dias 2 x 1 Cascavel
+CSA 2 x 0 Lagarto
+Serra Branca 1 x 0 Juazeirense
+Democrata-GV 1 x 1 Ivinhema
+Sampaio Corrêa 1 x 2 Trem
+Sergipe 0 x 1 ASA
+Uberlândia 2 x 2 Rio Branco-ES
+Nacional-AM 0 x 0 Araguaína
+Manauara 1 x 1 Independência-AC
+Porto Velho 1 (7) x (6) 1 São Raimundo-RR
+[terceira-fase|1]
+Goiatuba 0 x 1 Manauara
+Imperatriz 1 x 1 Ferroviário
+Porto Velho 2 x 0 Gama
+Trem 1 x 4 América-RN
+Luverdense 1 x 0 Guaporé
+Águia de Marabá 2 x 1 ABC
+Nacional-AM 1 x 0 Capital-DF
+Maguary 2 x 3 Iguatu
+CRAC 2 x 1 Treze
+São José-RS 1 x 0 Portuguesa-RJ
+Serra Branca 0 x 1 Uberlândia
+Marcílio Dias 1 x 1 Portuguesa
+Betim 1 x 0 CSA
+Velo Clube 2 x 1 São Luiz
+Ivinhema 1 x 2 ASA
+Cianorte 4 x 0 XV de Piracicaba
+[terceira-fase|2]
+Manauara 1 (3) x (4) 2 Goiatuba
+Ferroviário 3 x 0 Imperatriz
+Gama 2 (5) x (4) 0 Porto Velho
+Guaporé 0 x 0 Luverdense
+ABC 3 x 0 Águia de Marabá
+Capital-DF 1 (5) x (6) 0 Nacional-AM
+Iguatu 2 x 1 Maguary
+Treze 1 (4) x (3) 0 CRAC
+Portuguesa-RJ 0 x 0 São José-RS
+Uberlândia 2 x 2 Serra Branca
+Portuguesa 2 x 0 Marcílio Dias
+São Luiz 2 (5) x (3) 1 Velo Clube
+ASA 4 x 0 Ivinhema
+XV de Piracicaba 0 x 0 Cianorte
+América-RN 2 x 1 Trem
+CSA 4 x 0 Betim
+[oitavas|1]
+Goiatuba 3 x 0 Ferroviário
+América-RN 1 x 0 Gama
+Luverdense 0 x 0 ABC
+Nacional-AM 1 x 1 Iguatu
+São José-RS 2 x 1 Treze
+Uberlândia 2 x 0 Portuguesa
+São Luiz 0 x 0 CSA
+Cianorte 0 x 1 ASA
+[oitavas|2]
+Ferroviário 1 x 2 Goiatuba
+Gama 3 (4) x (3) 2 América-RN
+ABC 4 x 1 Luverdense
+Iguatu 1 (4) x (5) 1 Nacional-AM
+Treze 1 (0) x (3) 0 São José-RS
+Portuguesa 1 x 0 Uberlândia
+CSA 2 x 1 São Luiz
+ASA 5 x 1 Cianorte
+[quartas|1]
+São José-RS 1 x 1 Gama
+Goiatuba 0 x 0 ASA
+Nacional-AM 1 x 2 ABC
+Uberlândia 1 x 0 CSA
+[quartas|2]
+Gama 4 x 0 São José-RS
+ASA 1 (5) x (4) 1 Goiatuba
+ABC 1 x 0 Nacional-AM
+CSA 0 x 2 Uberlândia
+[semifinal|1]
+ASA 2 x 0 Gama
+Uberlândia 1 x 0 ABC
+[semifinal|2]
+Gama 0 x 0 ASA
+ABC 1 x 1 Uberlândia
+[final|1]
+ASA 0 x 2 Uberlândia
+[final|2]
+Uberlândia 1 x 1 ASA
+[playoff-acesso|1]
+Nacional-AM 3 x 1 CSA
+São José-RS 0 x 0 Goiatuba
+[playoff-acesso|2]
+CSA 0 x 0 Nacional-AM
+Goiatuba 1 x 1 São José-RS

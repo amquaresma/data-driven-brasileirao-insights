@@ -64,7 +64,7 @@ def get_standings(code: str):
     client = get_supabase_client()
     result = (
         client.table("standings_entries")
-        .select("*, team:teams!standings_entries_team_id_fkey(*), group:groups(name)")
+        .select("*, team:teams!standings_entries_team_id_fkey(*), group:groups(name), phase:phases(name, phase_order)")
         .eq("competition_id", competition["id"])
         .order("position")
         .execute()
@@ -74,12 +74,15 @@ def get_standings(code: str):
     for row in result.data:
         group = row.pop("group", None) or {}
         row["group_name"] = group.get("name")
+        phase = row.pop("phase", None) or {}
+        row["phase_name"] = phase.get("name")
+        row["phase_order"] = phase.get("phase_order")
         entries.append(row)
 
     def natural(text):
         return [int(t) if t.isdigit() else t for t in re.split(r"(\d+)", text or "")]
 
-    entries.sort(key=lambda e: (natural(e["group_name"]), e["position"]))
+    entries.sort(key=lambda e: (-(e["phase_order"] or 0), e["phase_name"] or "", natural(e["group_name"]), e["position"]))
     return entries
 
 
@@ -98,7 +101,8 @@ def get_matches(code: str, round_number: int | None = None):
             "*, "
             "home_team:teams!matches_home_team_id_fkey(*), "
             "away_team:teams!matches_away_team_id_fkey(*), "
-            "round:rounds(number)"
+            "round:rounds(number), "
+            "phase:phases(name, phase_order)"
         )
         .eq("competition_id", competition["id"])
     )
@@ -108,6 +112,23 @@ def get_matches(code: str, round_number: int | None = None):
     matches = result.data
     if round_number is not None:
         matches = [m for m in matches if (m.get("round") or {}).get("number") == round_number]
+
+    for m in matches:
+        phase = m.pop("phase", None) or {}
+        m["phase_name"] = phase.get("name")
+        m["phase_order"] = phase.get("phase_order")
+
+    # Só ordena quando há fases (mata-mata); séries sem fase mantêm a ordem atual.
+    if any(m["phase_order"] for m in matches):
+        matches.sort(
+            key=lambda m: (
+                -(m["phase_order"] or 0),
+                m["phase_name"] or "",
+                m.get("tie_key") or "",
+                m.get("leg") or 0,
+                m.get("match_date") or "",
+            )
+        )
 
     return matches
 

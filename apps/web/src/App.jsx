@@ -120,27 +120,12 @@ function ApiStatus() {
   );
 }
 
-function StandingsView({ serie, phase }) {
-  const { entries, loading, error } = useStandings(serie);
-
-  if (loading) return <p className="state-message">Carregando classificação...</p>;
-  if (error) return <p className="state-message error">{error}</p>;
-  if (entries.length === 0)
-    return (
-      <p className="state-message">
-        {phase ? `Fase atual: ${phase}. ` : ""}
-        Esta fase não tem classificação por pontos. Veja os jogos na aba Partidas.
-      </p>
-    );
-
-  const hasGroups = entries.some((e) => e.group_name);
-
+function StandingsTable({ rows }) {
   return (
     <table className="standings-table">
       <thead>
         <tr>
           <th>#</th>
-          {hasGroups && <th>Grupo</th>}
           <th style={{ textAlign: "left" }}>Time</th>
           <th>P</th>
           <th>J</th>
@@ -154,10 +139,9 @@ function StandingsView({ serie, phase }) {
         </tr>
       </thead>
       <tbody>
-        {entries.map((entry, i) => (
-          <tr key={`${entry.team.id}-${entry.group_name ?? i}`}>
+        {rows.map((entry) => (
+          <tr key={entry.team.id}>
             <td>{entry.position}</td>
-            {hasGroups && <td>{entry.group_name}</td>}
             <td className="team-cell">
               {entry.team.badge_url && (
                 <img src={entry.team.badge_url} alt="" width="20" height="20" loading="lazy" />
@@ -186,6 +170,66 @@ function StandingsView({ serie, phase }) {
   );
 }
 
+function StandingsView({ serie, phase }) {
+  const { entries, loading, error } = useStandings(serie);
+
+  if (loading) return <p className="state-message">Carregando classificação...</p>;
+  if (error) return <p className="state-message error">{error}</p>;
+  if (entries.length === 0)
+    return (
+      <p className="state-message">
+        {phase ? `Fase atual: ${phase}. ` : ""}
+        Esta fase não tem classificação por pontos. Veja os jogos na aba Partidas.
+      </p>
+    );
+
+  // fase -> grupo -> linhas (a API já devolve ordenado)
+  const phases = [];
+  for (const e of entries) {
+    const pName = e.phase_name ?? null;
+    let p = phases.find((x) => x.name === pName);
+    if (!p) {
+      p = { name: pName, groups: [] };
+      phases.push(p);
+    }
+    const gName = e.group_name ?? null;
+    let g = p.groups.find((x) => x.name === gName);
+    if (!g) {
+      g = { name: gName, rows: [] };
+      p.groups.push(g);
+    }
+    g.rows.push(e);
+  }
+
+  return (
+    <div>
+      {phases.map((p) => (
+        <section key={p.name ?? "unica"} className="phase-section">
+          {p.name && <h3 className="phase-title">{p.name}</h3>}
+          {p.groups.map((g) => (
+            <div key={g.name ?? "tabela"} className="group-block">
+              {p.groups.length > 1 && g.name && <h4 className="group-title">{g.name}</h4>}
+              <StandingsTable rows={g.rows} />
+            </div>
+          ))}
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function pickChartEntries(entries) {
+  const byPhase = new Map();
+  for (const e of entries) {
+    const key = e.phase_name ?? "";
+    byPhase.set(key, [...(byPhase.get(key) ?? []), e]);
+  }
+  const fits = [...byPhase.entries()]
+    .filter(([, list]) => list.length <= 24)
+    .sort((a, b) => b[1].length - a[1].length);
+  return fits.length ? { phase: fits[0][0], list: fits[0][1] } : null;
+}
+
 function AnalyticsView({ serie }) {
   const { entries, loading, error } = useStandings(serie);
 
@@ -194,13 +238,24 @@ function AnalyticsView({ serie }) {
   if (entries.length === 0)
     return <p className="state-message">Sem dados suficientes para análise no momento.</p>;
 
+  const picked = pickChartEntries(entries);
+  if (!picked)
+    return (
+      <p className="state-message">
+        Os gráficos comparam até 24 times por vez. Esta série tem {entries.length} times em vários grupos.
+      </p>
+    );
+
   return (
-    <div className="charts-grid">
-      <GoalsChart entries={entries} />
-      <EfficiencyChart entries={entries} />
-      <GoalDifferenceChart entries={entries} />
-      <ResultsDistributionChart entries={entries} />
-    </div>
+    <>
+      {picked.phase && <p className="metrics-note">Base dos gráficos: {picked.phase}</p>}
+      <div className="charts-grid">
+        <GoalsChart entries={picked.list} />
+        <EfficiencyChart entries={picked.list} />
+        <GoalDifferenceChart entries={picked.list} />
+        <ResultsDistributionChart entries={picked.list} />
+      </div>
+    </>
   );
 }
 

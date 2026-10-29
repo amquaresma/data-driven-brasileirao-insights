@@ -4,6 +4,7 @@ from app.infrastructure.supabase import get_supabase_client
 from app.schemas.competition import CompetitionOut
 from app.schemas.match import MatchOut
 from app.schemas.match_detail import MatchDetailOut
+from app.schemas.analytics import TeamMetricsOut
 from app.schemas.standings import StandingsEntryOut
 from app.schemas.team import TeamOut
 
@@ -159,3 +160,65 @@ def get_match_detail(match_id: str):
     match["events"] = events_result.data
 
     return match
+
+
+
+def _rows_by_team(table: str, competition_id: str, extra_filter: tuple[str, int] | None = None) -> dict[str, dict]:
+    client = get_supabase_client()
+    query = (
+        client.table(table)
+        .select("*, team:teams(*)")
+        .eq("competition_id", competition_id)
+    )
+    if extra_filter:
+        query = query.eq(*extra_filter)
+    return {row["team_id"]: row for row in query.execute().data}
+
+
+@router.get("/{code}/team-metrics", response_model=list[TeamMetricsOut])
+def get_team_metrics(code: str):
+    """
+    Métricas de Analytics por time (Elo, momentum, forma, streaks,
+    volatilidade, médias dos últimos 5 jogos), ordenadas por Elo.
+    Times sem alguma métrica vêm com o campo nulo, sem valor inventado.
+    """
+    competition = _get_latest_competition(code)
+    cid = competition["id"]
+
+    elo = _rows_by_team("team_elo_ratings", cid)
+    momentum = _rows_by_team("team_momentum", cid)
+    form = _rows_by_team("team_form_scores", cid)
+    streaks = _rows_by_team("team_streaks", cid)
+    volatility = _rows_by_team("team_volatility", cid)
+    rolling5 = _rows_by_team("team_rolling_stats", cid, ("window_size", 5))
+
+    team_ids = set(elo) | set(momentum) | set(form) | set(streaks) | set(volatility) | set(rolling5)
+
+    result = []
+    for team_id in team_ids:
+        source = next(t[team_id] for t in (elo, momentum, form, streaks, volatility, rolling5) if team_id in t)
+        m, f, s = momentum.get(team_id, {}), form.get(team_id, {}), streaks.get(team_id, {})
+        v, r = volatility.get(team_id, {}), rolling5.get(team_id, {})
+        result.append(
+            {
+                "team": source["team"],
+                "elo": elo.get(team_id, {}).get("rating"),
+                "momentum_score": m.get("momentum_score"),
+                "attacking_trend": m.get("attacking_trend"),
+                "defensive_trend": m.get("defensive_trend"),
+                "points_trend": m.get("points_trend"),
+                "weighted_form_score": f.get("weighted_form_score"),
+                "recent_form": f.get("recent_form"),
+                "win_streak": s.get("current_win_streak"),
+                "unbeaten_streak": s.get("current_unbeaten_streak"),
+                "clean_sheet_streak": s.get("current_clean_sheet_streak"),
+                "scoring_streak": s.get("current_scoring_streak"),
+                "volatility_index": v.get("volatility_index"),
+                "goals_for_avg_5": r.get("goals_for_avg"),
+                "goals_against_avg_5": r.get("goals_against_avg"),
+                "points_avg_5": r.get("points_avg"),
+            }
+        )
+
+    result.sort(key=lambda x: x["elo"] if x["elo"] is not None else 0, reverse=True)
+    return result

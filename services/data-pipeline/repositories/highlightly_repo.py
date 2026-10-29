@@ -332,3 +332,17 @@ def insert_player_match_statistics(
         ).execute()
 
     return len(payloads)
+
+
+LIVE_FIELDS = (
+    "date_time", "match_date", "match_time", "started", "status", "status_code",
+    "home_score", "away_score", "penalties_home", "penalties_away",
+)
+
+
+def update_match_live_fields(match_id: str, match_data: dict[str, Any]) -> None:
+    """Atualiza só os campos que mudam com o jogo (placar, status, horário)."""
+    client = get_supabase_client()
+    client.table("matches").update(
+        {k: match_data[k] for k in LIVE_FIELDS}
+    ).eq("id", match_id).execute()

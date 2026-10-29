@@ -26,6 +26,7 @@ from repositories.highlightly_repo import (
     create_round,
     link_match,
     create_match,
+    update_match_live_fields,
 )
 
 
@@ -82,6 +83,7 @@ def ingest_matches(serie: str, season: int = 2026) -> None:
 
         if len(candidates) == 1:
             link_match(candidates[0], match_data["external_id"])
+            update_match_live_fields(candidates[0], match_data)
             linked += 1
         else:
             match_id = create_match(
@@ -91,6 +93,7 @@ def ingest_matches(serie: str, season: int = 2026) -> None:
                 home_team_id=home_team_id,
                 away_team_id=away_team_id,
             )
+            link_match(match_id, match_data["external_id"])
             existing_matches.setdefault(pair_key, []).append(match_id)
             created += 1
 

@@ -26,7 +26,7 @@ const baseOptions = {
     legend: { labels: { color: "#ccc" } },
   },
   scales: {
-    x: { ticks: { color: "#aaa" }, grid: { color: "#333" } },
+    x: { ticks: { color: "#aaa", autoSkip: false, maxRotation: 90, minRotation: 45, font: { size: 11 } }, grid: { color: "#333" } },
     y: { ticks: { color: "#aaa" }, grid: { color: "#333" } },
   },
 };

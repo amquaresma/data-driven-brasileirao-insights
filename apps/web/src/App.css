@@ -442,3 +442,8 @@
 .event-icon {
   font-size: 0.95rem;
 }
+
+/* Um gráfico por linha: com 20 times, duas colunas não deixam espaço pros nomes */
+.charts-grid {
+  grid-template-columns: 1fr;
+}

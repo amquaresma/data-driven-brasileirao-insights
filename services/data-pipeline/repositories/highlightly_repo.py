@@ -297,7 +297,10 @@ def resolve_or_create_player(highlightly_player_id: int, name: str, full_name: s
 
 
 def insert_player_match_statistics(
-    match_id: str, team_id_map: dict[str, str], rows: list[dict[str, Any]]
+    match_id: str,
+    team_id_map: dict[str, str],
+    rows: list[dict[str, Any]],
+    player_cache: dict[str, str] | None = None,
 ) -> int:
     client = get_supabase_client()
     payloads = []
@@ -307,9 +310,15 @@ def insert_player_match_statistics(
         if team_id is None:
             continue
 
-        player_id = resolve_or_create_player(
-            row["highlightly_player_id"], row["player_name"], row["player_full_name"], row["position"]
-        )
+        hl_player_key = str(row["highlightly_player_id"])
+        if player_cache is not None and hl_player_key in player_cache:
+            player_id = player_cache[hl_player_key]
+        else:
+            player_id = resolve_or_create_player(
+                row["highlightly_player_id"], row["player_name"], row["player_full_name"], row["position"]
+            )
+            if player_cache is not None:
+                player_cache[hl_player_key] = player_id
 
         payload = {k: v for k, v in row.items() if not k.startswith("highlightly_") and k not in ("player_name", "player_full_name", "position")}
         payload["match_id"] = match_id

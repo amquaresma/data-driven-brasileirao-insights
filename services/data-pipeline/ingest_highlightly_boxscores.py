@@ -104,6 +104,19 @@ def ingest_boxscores(serie: str, season: int, limit: int) -> None:
     player_cache = load_player_cache()
 
     pending = load_pending(competition_id)
+
+    # Partidas cujo box score a fonte devolveu vazio ([]) não têm dado
+    # pra gravar. Pulamos para não ocuparem vaga no lote todo dia.
+    # (Para tentar de novo, apague o arquivo correspondente em .cache/.)
+    def _empty_in_source(hl_id: str) -> bool:
+        f = CACHE_DIR / f"box_score_{hl_id}.json"
+        return f.exists() and f.read_text().strip() == "[]"
+
+    skipped_empty = [p for p in pending if _empty_in_source(p[1])]
+    pending = [p for p in pending if not _empty_in_source(p[1])]
+    if skipped_empty:
+        print(f"Partidas sem box score na fonte (puladas): {len(skipped_empty)}")
+
     batch = pending[:limit]
     print(f"Partidas sem box score: {len(pending)} | nesta execução: {len(batch)}")
 

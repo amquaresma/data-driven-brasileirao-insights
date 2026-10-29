@@ -72,6 +72,7 @@ def load_existing_matches(competition_id: str) -> dict[tuple[str, str], list[str
         client.table("matches")
         .select("id, home_team_id, away_team_id")
         .eq("competition_id", competition_id)
+        .neq("provider", "manual")  # jogos carregados à mão nunca são ligados nem sobrescritos
         .execute()
     )
     index: dict[tuple[str, str], list[str]] = {}

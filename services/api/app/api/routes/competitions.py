@@ -117,6 +117,7 @@ def get_matches(code: str, round_number: int | None = None):
         phase = m.pop("phase", None) or {}
         m["phase_name"] = phase.get("name")
         m["phase_order"] = phase.get("phase_order")
+        m["round_number"] = (m.get("round") or {}).get("number")
 
     # Só ordena quando há fases (mata-mata); séries sem fase mantêm a ordem atual.
     if any(m["phase_order"] for m in matches):

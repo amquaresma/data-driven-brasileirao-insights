@@ -514,3 +514,28 @@
   flex-direction: column;
   gap: 0.15rem;
 }
+
+/* ===== Navegação por rodada ===== */
+
+.round-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.round-nav button,
+.round-nav select {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.round-nav button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}

@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 function formatDate(dateStr) {
   if (!dateStr) return "";
   const [, month, day] = dateStr.split("-");
@@ -147,12 +149,21 @@ function PhaseBlock({ items, onSelectMatch }) {
   );
 }
 
-export function MatchesList({ matches, onSelectMatch }) {
-  if (matches.length === 0) {
-    return <p className="state-message">Nenhuma partida disponível no momento.</p>;
-  }
+function defaultRound(rounds, matches) {
+  const played = matches.filter(
+    (m) => m.round_number != null && m.home_score != null && m.away_score != null && m.match_date,
+  );
+  if (!played.length) return rounds[0];
+  return played.reduce((a, b) => (b.match_date > a.match_date ? b : a)).round_number;
+}
 
-  if (!matches.some((m) => m.phase_name)) {
+function RoundBrowser({ matches, onSelectMatch }) {
+  const [round, setRound] = useState(null);
+  const rounds = [...new Set(matches.map((m) => m.round_number).filter((n) => n != null))].sort(
+    (a, b) => a - b,
+  );
+
+  if (rounds.length < 2) {
     return (
       <div className="matches-list">
         {matches.map((m) => (
@@ -160,6 +171,49 @@ export function MatchesList({ matches, onSelectMatch }) {
         ))}
       </div>
     );
+  }
+
+  const current = round ?? defaultRound(rounds, matches);
+  const idx = rounds.indexOf(current);
+  const shown = matches
+    .filter((m) => m.round_number === current)
+    .sort((a, b) =>
+      `${a.match_date ?? ""} ${a.match_time ?? ""}`.localeCompare(`${b.match_date ?? ""} ${b.match_time ?? ""}`),
+    );
+
+  return (
+    <div>
+      <div className="round-nav">
+        <button disabled={idx <= 0} onClick={() => setRound(rounds[idx - 1])}>
+          ‹
+        </button>
+        <select value={current} onChange={(e) => setRound(Number(e.target.value))}>
+          {rounds.map((n) => (
+            <option key={n} value={n}>
+              Rodada {n}
+            </option>
+          ))}
+        </select>
+        <button disabled={idx >= rounds.length - 1} onClick={() => setRound(rounds[idx + 1])}>
+          ›
+        </button>
+      </div>
+      <div className="matches-list">
+        {shown.map((m) => (
+          <MatchCard key={m.id} match={m} onSelectMatch={onSelectMatch} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function MatchesList({ matches, onSelectMatch }) {
+  if (matches.length === 0) {
+    return <p className="state-message">Nenhuma partida disponível no momento.</p>;
+  }
+
+  if (!matches.some((m) => m.phase_name)) {
+    return <RoundBrowser matches={matches} onSelectMatch={onSelectMatch} />;
   }
 
   const sections = [];

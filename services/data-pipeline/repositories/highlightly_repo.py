@@ -311,7 +311,7 @@ def insert_player_match_statistics(
             row["highlightly_player_id"], row["player_name"], row["player_full_name"], row["position"]
         )
 
-        payload = {k: v for k, v in row.items() if not k.startswith("highlightly_") and k not in ("player_name", "player_full_name")}
+        payload = {k: v for k, v in row.items() if not k.startswith("highlightly_") and k not in ("player_name", "player_full_name", "position")}
         payload["match_id"] = match_id
         payload["player_id"] = player_id
         payload["team_id"] = team_id

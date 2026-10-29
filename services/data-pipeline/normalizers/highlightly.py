@@ -164,8 +164,10 @@ def normalize_player_box_score(match_detail_box_score: list[dict]) -> list[dict]
         highlightly_team_id = team_block["team"]["id"]
 
         for player in team_block.get("players", []):
-            stats_list = player.get("statistics") or [{}]
-            stats = stats_list[0] if stats_list else {}
+            raw_stats = player.get("statistics") or {}
+            stats = raw_stats[0] if isinstance(raw_stats, list) and raw_stats else raw_stats
+            if not isinstance(stats, dict):
+                stats = {}
 
             rows.append(
                 {

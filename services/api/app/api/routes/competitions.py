@@ -1,3 +1,4 @@
+import re
 from fastapi import APIRouter, HTTPException
 
 from app.infrastructure.supabase import get_supabase_client
@@ -75,6 +76,10 @@ def get_standings(code: str):
         row["group_name"] = group.get("name")
         entries.append(row)
 
+    def natural(text):
+        return [int(t) if t.isdigit() else t for t in re.split(r"(\d+)", text or "")]
+
+    entries.sort(key=lambda e: (natural(e["group_name"]), e["position"]))
     return entries
 
 

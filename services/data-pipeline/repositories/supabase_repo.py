@@ -113,7 +113,7 @@ def upsert_standings_entry(
 
     client.table("standings_entries").upsert(
         payload,
-        on_conflict="competition_id,team_id",
+        on_conflict="competition_id,phase_id,team_id",
     ).execute()
 
 
@@ -177,6 +177,7 @@ def delete_standings(competition_id: str) -> int:
         client.table("standings_entries")
         .delete()
         .eq("competition_id", competition_id)
+        .is_("phase_id", "null")
         .execute()
     )
     return len(result.data)

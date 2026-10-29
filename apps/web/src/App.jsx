@@ -218,6 +218,8 @@ function StandingsView({ serie, phase }) {
   );
 }
 
+const MAX_CHART_TEAMS = 24;
+
 function pickChartEntries(entries) {
   const byPhase = new Map();
   for (const e of entries) {
@@ -225,9 +227,102 @@ function pickChartEntries(entries) {
     byPhase.set(key, [...(byPhase.get(key) ?? []), e]);
   }
   const fits = [...byPhase.entries()]
-    .filter(([, list]) => list.length <= 24)
+    .filter(([, list]) => list.length <= MAX_CHART_TEAMS)
     .sort((a, b) => b[1].length - a[1].length);
   return fits.length ? { phase: fits[0][0], list: fits[0][1] } : null;
+}
+
+// Mata-mata não tem tabela de pontos: calculamos uma a partir dos jogos,
+// começando na primeira fase que tenha até 24 times.
+function deriveTableFromMatches(matches) {
+  const phases = new Map();
+  for (const m of matches) {
+    if (m.phase_order == null || m.home_score == null || m.away_score == null) continue;
+    if (!phases.has(m.phase_order)) phases.set(m.phase_order, { name: m.phase_name, teams: new Set() });
+    const p = phases.get(m.phase_order);
+    p.teams.add(m.home_team.id);
+    p.teams.add(m.away_team.id);
+  }
+  const start = [...phases.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .find(([, p]) => p.teams.size <= MAX_CHART_TEAMS);
+  if (!start) return null;
+  const [startOrder, startPhase] = start;
+
+  const table = new Map();
+  const rowOf = (team) => {
+    if (!table.has(team.id)) {
+      table.set(team.id, {
+        team, points: 0, matches_played: 0, wins: 0, draws: 0, losses: 0,
+        goals_for: 0, goals_against: 0,
+      });
+    }
+    return table.get(team.id);
+  };
+
+  for (const m of matches) {
+    if (m.phase_order == null || m.phase_order < startOrder) continue;
+    if (m.home_score == null || m.away_score == null) continue;
+    const h = rowOf(m.home_team);
+    const a = rowOf(m.away_team);
+    h.matches_played += 1;
+    a.matches_played += 1;
+    h.goals_for += m.home_score;
+    h.goals_against += m.away_score;
+    a.goals_for += m.away_score;
+    a.goals_against += m.home_score;
+    if (m.home_score > m.away_score) {
+      h.wins += 1; h.points += 3; a.losses += 1;
+    } else if (m.home_score < m.away_score) {
+      a.wins += 1; a.points += 3; h.losses += 1;
+    } else {
+      h.draws += 1; a.draws += 1; h.points += 1; a.points += 1;
+    }
+  }
+
+  const list = [...table.values()]
+    .map((r) => ({
+      ...r,
+      goal_difference: r.goals_for - r.goals_against,
+      efficiency: r.matches_played ? Number(((r.points / (3 * r.matches_played)) * 100).toFixed(1)) : 0,
+    }))
+    .sort((x, y) => y.points - x.points || y.goal_difference - x.goal_difference || y.goals_for - x.goals_for)
+    .map((r, i) => ({ ...r, position: i + 1 }));
+
+  return { phaseName: startPhase.name, list };
+}
+
+function ChartsGrid({ entries }) {
+  return (
+    <div className="charts-grid">
+      <GoalsChart entries={entries} />
+      <EfficiencyChart entries={entries} />
+      <GoalDifferenceChart entries={entries} />
+      <ResultsDistributionChart entries={entries} />
+    </div>
+  );
+}
+
+function MatchesBasedAnalytics({ serie }) {
+  const { matches, loading, error } = useMatches(serie);
+
+  if (loading) return <p className="state-message">Carregando análises...</p>;
+  if (error) return <p className="state-message error">{error}</p>;
+
+  const derived = deriveTableFromMatches(matches);
+  if (!derived)
+    return <p className="state-message">Sem dados suficientes para análise no momento.</p>;
+
+  return (
+    <>
+      <p className="metrics-note">
+        Base dos gráficos: {derived.phaseName} em diante ({derived.list.length} times), calculada a
+        partir dos jogos, já que o mata-mata não tem tabela de pontos. Times eliminados antes jogaram
+        menos partidas, então os totais de gols não são comparáveis entre eles. Use o aproveitamento.
+      </p>
+      <ChartsGrid entries={derived.list} />
+    </>
+  );
 }
 
 function AnalyticsView({ serie }) {
@@ -235,28 +330,17 @@ function AnalyticsView({ serie }) {
 
   if (loading) return <p className="state-message">Carregando análises...</p>;
   if (error) return <p className="state-message error">{error}</p>;
-  if (entries.length === 0)
-    return <p className="state-message">Sem dados suficientes para análise no momento.</p>;
 
-  const picked = pickChartEntries(entries);
-  if (!picked)
+  const picked = entries.length ? pickChartEntries(entries) : null;
+  if (picked)
     return (
-      <p className="state-message">
-        Os gráficos comparam até 24 times por vez. Esta série tem {entries.length} times em vários grupos.
-      </p>
+      <>
+        {picked.phase && <p className="metrics-note">Base dos gráficos: {picked.phase}</p>}
+        <ChartsGrid entries={picked.list} />
+      </>
     );
 
-  return (
-    <>
-      {picked.phase && <p className="metrics-note">Base dos gráficos: {picked.phase}</p>}
-      <div className="charts-grid">
-        <GoalsChart entries={picked.list} />
-        <EfficiencyChart entries={picked.list} />
-        <GoalDifferenceChart entries={picked.list} />
-        <ResultsDistributionChart entries={picked.list} />
-      </div>
-    </>
-  );
+  return <MatchesBasedAnalytics serie={serie} />;
 }
 
 function MatchesView({ serie }) {

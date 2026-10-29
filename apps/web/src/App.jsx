@@ -78,6 +78,23 @@ function useMatches(serie) {
   return { matches, loading, error };
 }
 
+function useCompetition(serie) {
+  const [competition, setCompetition] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${API_URL}/competitions`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list) => !cancelled && setCompetition(list.find((c) => c.code === serie) ?? null))
+      .catch(() => !cancelled && setCompetition(null));
+    return () => {
+      cancelled = true;
+    };
+  }, [serie]);
+
+  return competition;
+}
+
 function ApiStatus() {
   const [status, setStatus] = useState("Verificando API...");
   const [error, setError] = useState(null);
@@ -103,7 +120,7 @@ function ApiStatus() {
   );
 }
 
-function StandingsView({ serie }) {
+function StandingsView({ serie, phase }) {
   const { entries, loading, error } = useStandings(serie);
 
   if (loading) return <p className="state-message">Carregando classificação...</p>;
@@ -111,8 +128,8 @@ function StandingsView({ serie }) {
   if (entries.length === 0)
     return (
       <p className="state-message">
-        Nenhuma classificação disponível no momento (a competição pode estar
-        em fase de mata-mata).
+        {phase ? `Fase atual: ${phase}. ` : ""}
+        Esta fase não tem classificação por pontos. Veja os jogos na aba Partidas.
       </p>
     );
 
@@ -204,6 +221,7 @@ function MatchesView({ serie }) {
 function App() {
   const [serie, setSerie] = useState("a");
   const [view, setView] = useState("standings");
+  const competition = useCompetition(serie);
 
   const currentSerieLabel = SERIES.find((s) => s.code === serie)?.label;
   const currentViewLabel = VIEWS.find((v) => v.key === view)?.label;
@@ -241,6 +259,9 @@ function App() {
           <h2>
             {currentSerieLabel} · {currentViewLabel}
           </h2>
+          {competition?.phase_description && (
+            <span className="api-status">Fase: {competition.phase_description}</span>
+          )}
         </div>
 
         <nav className="view-tabs">
@@ -255,7 +276,7 @@ function App() {
           ))}
         </nav>
 
-        {view === "standings" && <StandingsView serie={serie} />}
+        {view === "standings" && <StandingsView serie={serie} phase={competition?.phase_description} />}
         {view === "matches" && <MatchesView serie={serie} />}
         {view === "analytics" && <AnalyticsView serie={serie} />}
       </main>

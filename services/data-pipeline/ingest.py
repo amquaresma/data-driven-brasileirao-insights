@@ -32,6 +32,7 @@ from repositories.supabase_repo import (
     upsert_standings_entry,
     upsert_round,
     upsert_match,
+    delete_standings,
 )
 
 
@@ -54,6 +55,12 @@ def ingest_standings(serie: Serie, *, group: str | None = None) -> None:
 
     entries = normalize_standings_entries(raw)
     print(f"  {len(entries)} entradas de classificação encontradas.")
+
+    # Fase eliminatória não tem tabela de pontos: a classificação antiga
+    # (ex: fase de grupos já encerrada) não deve continuar aparecendo.
+    if not entries and "mata" in (competition.get("phase_description") or "").lower():
+        removed = delete_standings(competition_id)
+        print(f"  Fase sem classificação ({competition['phase_description']}): {removed} linhas antigas removidas.")
 
     for entry in entries:
         team_data, external_id_data = normalize_team(entry["team"])

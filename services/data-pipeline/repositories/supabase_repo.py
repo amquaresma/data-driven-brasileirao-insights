@@ -168,3 +168,15 @@ def upsert_match(
         .execute()
     )
     return result.data[0]["id"]
+
+
+def delete_standings(competition_id: str) -> int:
+    """Remove a classificação de uma competição (usado quando a fase atual não tem tabela)."""
+    client = get_supabase_client()
+    result = (
+        client.table("standings_entries")
+        .delete()
+        .eq("competition_id", competition_id)
+        .execute()
+    )
+    return len(result.data)

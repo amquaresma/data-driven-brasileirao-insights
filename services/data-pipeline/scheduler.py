@@ -46,7 +46,6 @@ def run_ingestion_cycle() -> None:
     for serie in SERIES:
         for resource_name, ingest_fn in (
             ("standings", ingest_standings),
-            ("rounds", ingest_rounds),
         ):
             try:
                 ingest_fn(serie)

@@ -136,6 +136,9 @@ function groupTies(items) {
 }
 
 function PhaseBlock({ items, onSelectMatch }) {
+  if (!items.some((m) => m.tie_key) && items.some((m) => m.round_number != null)) {
+    return <RoundBrowser matches={items} onSelectMatch={onSelectMatch} />;
+  }
   return (
     <div className="matches-list">
       {groupTies(items).map((t) =>

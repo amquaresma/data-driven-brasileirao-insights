@@ -13,7 +13,11 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import json
 import sys
+from pathlib import Path
+
+from infrastructure.supabase import get_supabase_client
 
 from sources.highlightly import paginate_matches, get_league_id
 from sources.exceptions import BrasileiraoSourceError
@@ -30,7 +34,7 @@ from repositories.highlightly_repo import (
 )
 
 
-def ingest_matches(serie: str, season: int = 2026) -> None:
+def ingest_matches(serie: str, season: int = 2026, use_cache: bool = False) -> None:
     league_id = get_league_id(serie)
     if league_id is None:
         print(f"Série '{serie}' não é coberta pela Highlightly. Nada a fazer.")
@@ -40,12 +44,30 @@ def ingest_matches(serie: str, season: int = 2026) -> None:
 
     competition_id = resolve_competition_id(serie, season, league_id)
 
+    # Séries com fases (C): a 1ª fase fica ligada à fase "Primeira fase".
+    phase = (
+        get_supabase_client().table("phases").select("id")
+        .eq("competition_id", competition_id).eq("slug", "primeira-fase").limit(1).execute().data
+    )
+    phase_id = phase[0]["id"] if phase else None
+
     print("Carregando reconciliações em lote (times, partidas, rodadas existentes)...")
     team_id_map = load_team_id_map()
     existing_matches = load_existing_matches(competition_id)
     round_id_map = load_round_id_map(competition_id)
 
-    all_matches = list(paginate_matches(serie, season))
+    cache = Path(__file__).parent / ".cache" / f"hl_matches_{serie}.json"
+    if use_cache and cache.exists():
+        all_matches = json.loads(cache.read_text())
+        print(f"Usando cache local ({cache.name}), 0 chamadas à API.")
+    else:
+        all_matches = list(paginate_matches(serie, season))
+
+    # Quadrangulares, mata-mata e final são carregados à mão: aqui só a fase de pontos corridos.
+    regular = [m for m in all_matches if str(m.get("round", "")).startswith("Regular Season")]
+    if len(regular) != len(all_matches):
+        print(f"Ignorando {len(all_matches) - len(regular)} jogos de fases que não são Regular Season.")
+    all_matches = regular
     total = len(all_matches)
     print(f"{total} partidas retornadas pela Highlightly. Processando...")
 
@@ -78,6 +100,8 @@ def ingest_matches(serie: str, season: int = 2026) -> None:
                 round_id_map[round_number] = round_id
 
         match_data = normalize_match(hl_match)
+        if phase_id:
+            match_data["phase_id"] = phase_id
         pair_key = (home_team_id, away_team_id)
         candidates = existing_matches.get(pair_key, [])
 
@@ -113,10 +137,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Ingestão de partidas da Highlightly.")
     parser.add_argument("serie", choices=["a", "b", "c", "d"])
     parser.add_argument("--season", type=int, default=2026)
+    parser.add_argument("--use-cache", action="store_true")
     args = parser.parse_args()
 
     try:
-        ingest_matches(args.serie, args.season)
+        ingest_matches(args.serie, args.season, args.use_cache)
     except BrasileiraoSourceError as exc:
         print(f"Erro ao consumir a fonte: [{exc.code}] {exc}", file=sys.stderr)
         sys.exit(1)

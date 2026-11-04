@@ -11,6 +11,7 @@ import { MatchDetail } from "./components/MatchDetail";
 import { TeamMetrics } from "./components/TeamMetrics";
 import { Predictions } from "./components/Predictions";
 import { WithAside, PredictionsInfo, TeamMetricsInfo } from "./components/InfoCards";
+import { ZonesAside, zoneStyle } from "./components/Zones";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -146,7 +147,7 @@ function StandingsTable({ rows }) {
       <tbody>
         {rows.map((entry) => (
           <tr key={entry.team.id}>
-            <td>{entry.position}</td>
+            <td style={zoneStyle(entry.legend)}>{entry.position}</td>
             <td className="team-cell">
               {entry.team.badge_url && (
                 <img src={entry.team.badge_url} alt="" width="20" height="20" loading="lazy" />
@@ -420,7 +421,11 @@ function App() {
           ))}
         </nav>
 
-        {view === "standings" && <StandingsView serie={serie} phase={competition?.phase_description} />}
+        {view === "standings" && (
+          <WithAside aside={<ZonesAside serie={serie} />} show={serie === "a" || serie === "b"}>
+            <StandingsView serie={serie} phase={competition?.phase_description} />
+          </WithAside>
+        )}
         {view === "matches" && <MatchesView serie={serie} />}
         {view === "predictions" && (
           <WithAside aside={<PredictionsInfo />} show={serie === "a" || serie === "b"}>

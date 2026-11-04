@@ -562,3 +562,19 @@
   font-size: 0.75rem;
   color: var(--text-muted);
 }
+
+/* ===== Métricas de clube ===== */
+
+.trend-up { color: var(--win); font-weight: 600; }
+.trend-down { color: var(--loss); font-weight: 600; }
+.trend-flat { color: var(--text-secondary); }
+
+.metrics-note {
+  margin-top: 1rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.standings-table thead th[title] {
+  cursor: help;
+}

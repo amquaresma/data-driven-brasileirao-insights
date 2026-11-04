@@ -8,6 +8,8 @@ import {
 } from "./components/StandingsCharts";
 import { MatchesList } from "./components/MatchesList";
 import { MatchDetail } from "./components/MatchDetail";
+import { TeamMetrics } from "./components/TeamMetrics";
+import { Predictions } from "./components/Predictions";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -21,6 +23,8 @@ const SERIES = [
 const VIEWS = [
   { key: "standings", label: "Classificação" },
   { key: "matches", label: "Partidas" },
+  { key: "predictions", label: "Previsões" },
+  { key: "teams", label: "Clubes" },
   { key: "analytics", label: "Análises" },
 ];
 
@@ -417,6 +421,8 @@ function App() {
 
         {view === "standings" && <StandingsView serie={serie} phase={competition?.phase_description} />}
         {view === "matches" && <MatchesView serie={serie} />}
+        {view === "predictions" && <Predictions serie={serie} />}
+        {view === "teams" && <TeamMetrics serie={serie} />}
         {view === "analytics" && <AnalyticsView serie={serie} />}
       </main>
     </div>

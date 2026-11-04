@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { formatWhen } from "../lib/datetime";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 // Estatísticas priorizadas para a visão compacta (nomes exatos como
@@ -122,7 +124,7 @@ export function MatchDetail({ matchId, onBack }) {
         </div>
       </div>
       <p className="match-detail-meta">
-        {detail.match_date} {detail.match_time} {detail.venue && `· ${detail.venue}`}
+        {formatWhen(detail)} {detail.venue && `· ${detail.venue}`}
       </p>
 
       {hasStats ? (

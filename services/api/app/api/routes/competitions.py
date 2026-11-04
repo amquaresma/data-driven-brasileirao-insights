@@ -266,7 +266,7 @@ def get_predictions(code: str):
     rows = (
         client.table("match_predictions")
         .select(
-            "*, match:matches(match_date, match_time, venue, status, competition_id, "
+            "*, match:matches(match_date, match_time, date_time, venue, status, competition_id, "
             "home_team:teams!matches_home_team_id_fkey(*), "
             "away_team:teams!matches_away_team_id_fkey(*))"
         )
@@ -291,6 +291,7 @@ def get_predictions(code: str):
             {
                 "match_id": row["match_id"],
                 "match_date": m.get("match_date"),
+                "date_time": m.get("date_time"),
                 "match_time": m.get("match_time"),
                 "venue": m.get("venue"),
                 "home_team": m["home_team"],

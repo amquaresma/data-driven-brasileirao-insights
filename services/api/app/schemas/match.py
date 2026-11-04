@@ -6,6 +6,7 @@ from app.schemas.team import TeamOut
 class MatchOut(BaseModel):
     id: str
     match_date: str | None = None
+    date_time: str | None = None
     match_time: str | None = None
     venue: str | None = None
     status: str | None = None

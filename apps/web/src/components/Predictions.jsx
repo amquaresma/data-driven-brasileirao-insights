@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { brt } from "../lib/datetime";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 function formatDay(dateStr) {
@@ -13,13 +15,14 @@ function pct(p) {
 }
 
 function PredictionCard({ p }) {
+  const when = brt(p);
   const badge = (team) =>
     team.badge_url && <img src={team.badge_url} alt="" width="24" height="24" loading="lazy" />;
 
   return (
     <div className="match-card">
       <div className="match-meta">
-        <span>{p.match_time}</span>
+        <span>{when.time}</span>
         {p.venue && <span>{p.venue}</span>}
       </div>
 
@@ -86,8 +89,9 @@ export function Predictions({ serie }) {
   const days = [];
   for (const p of items) {
     const last = days[days.length - 1];
-    if (last && last.date === p.match_date) last.items.push(p);
-    else days.push({ date: p.match_date, items: [p] });
+    const day = brt(p).date;
+    if (last && last.date === day) last.items.push(p);
+    else days.push({ date: day, items: [p] });
   }
 
   const info = items[0];

@@ -6,6 +6,7 @@ from app.schemas.team import TeamOut
 class PredictionOut(BaseModel):
     match_id: str
     match_date: str | None = None
+    date_time: str | None = None
     match_time: str | None = None
     venue: str | None = None
     home_team: TeamOut

@@ -40,7 +40,7 @@ export function PredictionsInfo() {
           arredondamento pode mostrar 99% ou 101%.
         </LegendItem>
         <LegendItem visual={<span className="legend-text">dia</span>}>
-          Só aparecem jogos ainda não disputados, agrupados por data.
+          Só aparecem jogos ainda não disputados, agrupados por data. Os horários são de Brasília.
         </LegendItem>
         <LegendItem visual={<span className="legend-text">nota</span>}>
           O texto no fim da página informa o modelo usado, quantos jogos o treinaram e quando as

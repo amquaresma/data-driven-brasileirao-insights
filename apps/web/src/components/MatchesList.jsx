@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { brt } from "../lib/datetime";
 
 function formatDate(dateStr) {
   if (!dateStr) return "";
@@ -35,6 +36,7 @@ function Score({ match }) {
 }
 
 function MatchCard({ match, onSelectMatch }) {
+  const when = brt(match);
   return (
     <button
       className={`match-card status-${match.status} match-card-clickable`}
@@ -42,8 +44,8 @@ function MatchCard({ match, onSelectMatch }) {
     >
       <div className="match-meta">
         {match.leg && <span>{legLabel(match.leg)}</span>}
-        <span>{formatDate(match.match_date)}</span>
-        <span>{match.match_time}</span>
+        <span>{formatDate(when.date)}</span>
+        <span>{when.time}</span>
         <span className="match-status">{statusLabel(match.status)}</span>
       </div>
 

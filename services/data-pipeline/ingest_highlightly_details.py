@@ -52,6 +52,9 @@ def ingest_details(serie: str, season: int = 2026, limit: int = 80) -> None:
         try:
             detail = get_match_detail(int(hl_external_id))
         except BrasileiraoSourceError as exc:
+            if exc.code == "429":
+                print("Limite diário atingido (429). Parando; rode de novo amanhã.")
+                break
             print(f"  [erro] match {match_id[:8]} (hl={hl_external_id}): {exc}")
             errors += 1
             continue

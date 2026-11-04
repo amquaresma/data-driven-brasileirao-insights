@@ -50,7 +50,7 @@ function PredictionCard({ p }) {
       </div>
       {p.p_over_2_5 != null && (
         <div className="pred-goals" title="Probabilidade de 3 ou mais gols no jogo (modelo de Poisson sobre a diferença de Elo). Previsão fraca: perto da média histórica.">
-          3 gols ou mais: {pct(p.p_over_2_5)} <span>(média histórica ~45%)</span>
+          3 gols ou mais: {pct(p.p_over_2_5)} {p.over_2_5_baseline != null && <span>(média histórica {pct(p.over_2_5_baseline)})</span>}
         </div>
       )}
     </div>

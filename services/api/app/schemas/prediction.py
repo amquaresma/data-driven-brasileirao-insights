@@ -18,6 +18,7 @@ class PredictionOut(BaseModel):
     p_over_2_5: float | None = None
     lambda_home: float | None = None
     lambda_away: float | None = None
+    over_2_5_baseline: float | None = None
     model_version: str
     trained_on: int
     generated_at: str

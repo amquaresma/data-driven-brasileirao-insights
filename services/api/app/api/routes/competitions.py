@@ -309,5 +309,15 @@ def get_predictions(code: str):
             }
         )
 
+    # média histórica de jogos com 3+ gols nesta série (base do aviso no card)
+    feats = (
+        client.table("match_features").select("over_2_5")
+        .in_("competition_id", [c["id"] for c in client.table("competitions").select("id").eq("code", code).execute().data])
+        .range(0, 9999).execute().data
+    )
+    baseline = round(sum(1 for f in feats if f["over_2_5"]) / len(feats), 4) if feats else None
+    for r in result:
+        r["over_2_5_baseline"] = baseline
+
     result.sort(key=lambda r: (r["match_date"] or "", r["match_time"] or ""))
     return result

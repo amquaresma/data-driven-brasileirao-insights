@@ -539,3 +539,26 @@
   opacity: 0.35;
   cursor: default;
 }
+
+/* ===== Previsões ===== */
+
+.pred-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.9rem;
+  background: var(--border);
+}
+
+.pred-home { background: var(--accent); }
+.pred-draw { background: var(--draw); }
+.pred-away { background: #3b82f6; }
+
+.pred-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}

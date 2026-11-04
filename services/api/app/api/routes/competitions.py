@@ -6,6 +6,7 @@ from app.schemas.competition import CompetitionOut
 from app.schemas.match import MatchOut
 from app.schemas.match_detail import MatchDetailOut
 from app.schemas.analytics import TeamMetricsOut
+from app.schemas.prediction import PredictionOut
 from app.schemas.standings import StandingsEntryOut
 from app.schemas.team import TeamOut
 
@@ -248,4 +249,61 @@ def get_team_metrics(code: str):
         )
 
     result.sort(key=lambda x: x["elo"] if x["elo"] is not None else 0, reverse=True)
+    return result
+
+
+
+@router.get("/{code}/predictions", response_model=list[PredictionOut])
+def get_predictions(code: str):
+    """
+    Probabilidades (casa/empate/fora) dos jogos ainda não disputados da edição
+    mais recente. Vêm do modelo salvo em match_predictions; para cada jogo vale
+    a previsão mais recente. Séries sem previsões devolvem lista vazia.
+    """
+    competition = _get_latest_competition(code)
+    client = get_supabase_client()
+
+    rows = (
+        client.table("match_predictions")
+        .select(
+            "*, match:matches(match_date, match_time, venue, status, competition_id, "
+            "home_team:teams!matches_home_team_id_fkey(*), "
+            "away_team:teams!matches_away_team_id_fkey(*))"
+        )
+        .order("generated_at", desc=True)
+        .execute()
+        .data
+    )
+
+    latest: dict[str, dict] = {}
+    for row in rows:
+        m = row.get("match") or {}
+        if m.get("competition_id") != competition["id"]:
+            continue
+        if "not started" not in (m.get("status") or "").lower():
+            continue
+        latest.setdefault(row["match_id"], row)
+
+    result = []
+    for row in latest.values():
+        m = row["match"]
+        result.append(
+            {
+                "match_id": row["match_id"],
+                "match_date": m.get("match_date"),
+                "match_time": m.get("match_time"),
+                "venue": m.get("venue"),
+                "home_team": m["home_team"],
+                "away_team": m["away_team"],
+                "p_home": row["p_home"],
+                "p_draw": row["p_draw"],
+                "p_away": row["p_away"],
+                "elo_diff": row.get("elo_diff"),
+                "model_version": row["model_version"],
+                "trained_on": row["trained_on"],
+                "generated_at": row["generated_at"],
+            }
+        )
+
+    result.sort(key=lambda r: (r["match_date"] or "", r["match_time"] or ""))
     return result

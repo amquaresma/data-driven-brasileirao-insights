@@ -10,6 +10,7 @@ import { MatchesList } from "./components/MatchesList";
 import { MatchDetail } from "./components/MatchDetail";
 import { TeamMetrics } from "./components/TeamMetrics";
 import { Predictions } from "./components/Predictions";
+import { WithAside, PredictionsInfo, TeamMetricsInfo } from "./components/InfoCards";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -421,8 +422,16 @@ function App() {
 
         {view === "standings" && <StandingsView serie={serie} phase={competition?.phase_description} />}
         {view === "matches" && <MatchesView serie={serie} />}
-        {view === "predictions" && <Predictions serie={serie} />}
-        {view === "teams" && <TeamMetrics serie={serie} />}
+        {view === "predictions" && (
+          <WithAside aside={<PredictionsInfo />} show={serie === "a" || serie === "b"}>
+            <Predictions serie={serie} />
+          </WithAside>
+        )}
+        {view === "teams" && (
+          <WithAside aside={<TeamMetricsInfo />} show={serie === "a" || serie === "b"}>
+            <TeamMetrics serie={serie} />
+          </WithAside>
+        )}
         {view === "analytics" && <AnalyticsView serie={serie} />}
       </main>
     </div>

@@ -608,3 +608,61 @@
 .legend-item b { color: var(--text); font-weight: 600; }
 
 .info-title-spaced { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+/* ===== Card lateral explicativo ===== */
+
+.main-content:has(.with-aside) { max-width: 1440px; }
+
+.with-aside {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.with-aside-main { min-width: 0; overflow-x: auto; }
+
+.info-card {
+  position: sticky;
+  top: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1.2rem;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.info-card h3 { font-size: 0.92rem; margin: 0 0 0.75rem; color: var(--text); }
+
+.info-card h4 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin: 1.1rem 0 0.3rem;
+}
+
+.info-card p { margin: 0 0 0.55rem; font-size: inherit; }
+.info-card ul { margin: 0; padding-left: 1.1rem; }
+.info-card li { margin-bottom: 0.3rem; }
+
+.info-glossary { margin: 1rem 0 0; }
+.info-glossary dt { color: var(--text); font-weight: 600; margin-top: 0.8rem; }
+.info-glossary dd { margin: 0.15rem 0 0; }
+
+.info-formula {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  margin: 0.4rem 0;
+  color: var(--text);
+}
+
+@media (max-width: 1300px) {
+  .with-aside { grid-template-columns: 1fr; }
+  .info-card { position: static; }
+}

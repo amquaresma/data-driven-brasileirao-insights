@@ -694,3 +694,10 @@ th[style*="left"] .sort-button { justify-content: flex-start; }
 
 .sort-arrow { font-size: 0.6rem; opacity: 0.35; }
 .sort-arrow.active { opacity: 1; color: var(--accent); }
+
+.pred-goals {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+.pred-goals span { color: var(--text-muted); }

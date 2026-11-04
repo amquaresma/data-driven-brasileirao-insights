@@ -27,8 +27,13 @@ from calculations.elo import INITIAL_RATING, EloMatchInput, compute_elo_ratings 
 from compute_match_features import fetch_matches  # noqa: E402
 from infrastructure.supabase import get_supabase_client  # noqa: E402
 from train_baseline import load, pipeline  # noqa: E402
+from scipy.stats import poisson  # noqa: E402
+from sklearn.linear_model import PoissonRegressor  # noqa: E402
+from sklearn.pipeline import make_pipeline  # noqa: E402
+from sklearn.preprocessing import StandardScaler  # noqa: E402
 
 MODEL_VERSION = "elo-logit-v1"
+GOALS_FEATURES = ["elo_diff", "serie_a"]  # mesmas do 'Elo' em evaluate_poisson.py
 
 
 def main() -> None:
@@ -38,6 +43,11 @@ def main() -> None:
     model = pipeline(1.0).fit(df[["elo_diff"]].to_numpy(float), df["result"].to_numpy().astype(str))
     classes = list(model.classes_)
     print(f"Modelo {MODEL_VERSION} treinado com {len(df)} jogos finalizados.")
+
+    gx = df[GOALS_FEATURES].to_numpy(float)
+    fit = lambda y: make_pipeline(StandardScaler(), PoissonRegressor(alpha=1.0, max_iter=1000)).fit(gx, y)
+    goals_home = fit(df["home_goals"].to_numpy(float))
+    goals_away = fit(df["away_goals"].to_numpy(float))
 
     names = {t["id"]: t["name"] for t in client.table("teams").select("id, name").execute().data}
     today = date.today().isoformat()
@@ -76,9 +86,12 @@ def main() -> None:
 
         diffs = np.array([[rating(u["home_team_id"]) - rating(u["away_team_id"])] for u in upcoming])
         proba = model.predict_proba(diffs)
+        gfeat = np.hstack([diffs, np.full((len(diffs), 1), 1.0 if serie == "a" else 0.0)])
+        lam_h, lam_a = goals_home.predict(gfeat), goals_away.predict(gfeat)
+        p_over = 1.0 - poisson.cdf(2, lam_h + lam_a)
 
         rows = []
-        for u, d, p in zip(upcoming, diffs[:, 0], proba):
+        for u, d, p, lh, la, po in zip(upcoming, diffs[:, 0], proba, lam_h, lam_a, p_over):
             pr = dict(zip(classes, p))
             rows.append({
                 "match_id": u["id"],
@@ -87,6 +100,9 @@ def main() -> None:
                 "p_draw": round(float(pr["D"]), 5),
                 "p_away": round(float(pr["A"]), 5),
                 "elo_diff": round(float(d), 2),
+                "p_over_2_5": round(float(po), 5),
+                "lambda_home": round(float(lh), 3),
+                "lambda_away": round(float(la), 3),
                 "trained_on": len(df),
                 "generated_at": now,
             })

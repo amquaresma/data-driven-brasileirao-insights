@@ -77,6 +77,14 @@ export function PredictionsInfo() {
         vitórias dele.
       </p>
 
+      <h4>Gols (3 ou mais)</h4>
+      <p>
+        Uma regressão de Poisson estima quantos gols cada time deve fazer a partir da diferença de Elo, e
+        a soma dá a chance de 3 gols ou mais. Na avaliação ela fica uns 0,5% melhor que a frequência
+        histórica no log loss: o ganho é consistente, mas pequeno. Trate como um ajuste fino sobre a
+        média (cerca de 45% em A e 38% em B), não como palpite. Placar exato não é previsto.
+      </p>
+
       <h4>O que ficou de fora</h4>
       <p>
         Forma recente, médias de gols e dias de descanso foram testados e não melhoraram o modelo, então
@@ -90,7 +98,7 @@ export function PredictionsInfo() {
         <li>
           Este Elo parte de 2020, por isso difere do Elo da aba Clubes, que usa só a temporada atual.
         </li>
-        <li>Não há previsão de gols: o modelo testado quase não melhorou sobre a frequência histórica.</li>
+        <li>A previsão de gols quase não melhora sobre a média histórica.</li>
       </ul>
     </>
   );

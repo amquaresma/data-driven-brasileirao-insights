@@ -15,6 +15,9 @@ class PredictionOut(BaseModel):
     p_draw: float
     p_away: float
     elo_diff: float | None = None
+    p_over_2_5: float | None = None
+    lambda_home: float | None = None
+    lambda_away: float | None = None
     model_version: str
     trained_on: int
     generated_at: str

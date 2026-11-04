@@ -102,7 +102,8 @@ export function TeamMetricsInfo() {
       <h3>Legenda</h3>
       <div className="legend-list">
         <LegendItem visual={<span className="legend-text">#</span>}>
-          Posição ordenada pelo <b>Elo</b>, não pela classificação do campeonato.
+          Posição pelo <b>Elo</b>, não pela classificação do campeonato. Ela é fixa: não muda quando
+          você reordena a tabela.
         </LegendItem>
         <LegendItem visual={<span className="trend-up">+1.10</span>}>
           <b>Verde:</b> momentum positivo, o time está melhor agora do que na média recente.
@@ -120,7 +121,8 @@ export function TeamMetricsInfo() {
           Nas sequências, zero quer dizer que ela terminou no último jogo.
         </LegendItem>
         <LegendItem visual={<span className="legend-text">?</span>}>
-          Passe o mouse sobre o cabeçalho de cada coluna para ver um resumo.
+          Passe o mouse sobre o cabeçalho para ver um resumo. <b>Clique</b> nele para ordenar (▲ crescente,
+          ▼ decrescente) e clique de novo para inverter.
         </LegendItem>
       </div>
 

@@ -666,3 +666,31 @@
   .with-aside { grid-template-columns: 1fr; }
   .info-card { position: static; }
 }
+
+/* ===== Ordenação nas métricas de clube ===== */
+
+.standings-table thead th.sortable { padding: 0; }
+
+.sort-button {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: 100%;
+  justify-content: center;
+  padding: 0.65rem 0.7rem;
+  cursor: pointer;
+  font: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+}
+
+th[style*="left"] .sort-button { justify-content: flex-start; }
+
+.sort-button:hover { color: var(--text); }
+.sort-button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.sort-arrow { font-size: 0.6rem; opacity: 0.35; }
+.sort-arrow.active { opacity: 1; color: var(--accent); }

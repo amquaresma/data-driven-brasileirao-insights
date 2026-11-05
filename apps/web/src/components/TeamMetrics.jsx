@@ -108,7 +108,8 @@ export function TeamMetrics({ serie }) {
 
   return (
     <>
-      <table className="standings-table">
+      <div className="table-scroll">
+        <table className="standings-table">
         <thead>
           <tr>
             <th title="Posição pelo Elo (fixa ao reordenar)">#</th>
@@ -139,6 +140,7 @@ export function TeamMetrics({ serie }) {
           ))}
         </tbody>
       </table>
+    </div>
       <p className="metrics-note">
         Elo, momentum e volatilidade são índices próprios do projeto, calculados a partir dos
         resultados. Clique no cabeçalho de uma coluna para ordenar, e de novo para inverter.

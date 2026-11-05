@@ -176,6 +176,7 @@ function StandingsTable({ rows }) {
         ))}
       </tbody>
     </table>
+  </div>
   );
 }
 

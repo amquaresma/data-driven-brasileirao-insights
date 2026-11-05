@@ -13,7 +13,9 @@ import { MatchDetail } from "./components/MatchDetail";
 import { TeamMetrics } from "./components/TeamMetrics";
 import { Predictions } from "./components/Predictions";
 import { WithAside, PredictionsInfo, TeamMetricsInfo } from "./components/InfoCards";
-import { ZonesAside, zoneStyle } from "./components/Zones";
+import { ZonesAside } from "./components/Zones";
+import { zoneStyle } from "./lib/zones";
+import { useApi } from "./lib/useApi";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -33,57 +35,19 @@ const VIEWS = [
 ];
 
 function useStandings(serie) {
-  const [entries, setEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-
-    fetch(`${API_URL}/competitions/${serie}/standings`)
-      .then((r) => {
-        if (!r.ok) throw new Error("Não foi possível carregar a classificação.");
-        return r.json();
-      })
-      .then((data) => !cancelled && setEntries(data))
-      .catch((err) => !cancelled && setError(err.message))
-      .finally(() => !cancelled && setLoading(false));
-
-    return () => {
-      cancelled = true;
-    };
-  }, [serie]);
-
-  return { entries, loading, error };
+  const { data, loading, error } = useApi(
+    `${API_URL}/competitions/${serie}/standings`,
+    "Não foi possível carregar a classificação.",
+  );
+  return { entries: data ?? [], loading, error };
 }
 
 function useMatches(serie) {
-  const [matches, setMatches] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-
-    fetch(`${API_URL}/competitions/${serie}/matches`)
-      .then((r) => {
-        if (!r.ok) throw new Error("Não foi possível carregar as partidas.");
-        return r.json();
-      })
-      .then((data) => !cancelled && setMatches(data))
-      .catch((err) => !cancelled && setError(err.message))
-      .finally(() => !cancelled && setLoading(false));
-
-    return () => {
-      cancelled = true;
-    };
-  }, [serie]);
-
-  return { matches, loading, error };
+  const { data, loading, error } = useApi(
+    `${API_URL}/competitions/${serie}/matches`,
+    "Não foi possível carregar as partidas.",
+  );
+  return { matches: data ?? [], loading, error };
 }
 
 function useCompetition(serie) {

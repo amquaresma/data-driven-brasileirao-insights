@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useApi } from "../lib/useApi";
 
 import { brt } from "../lib/datetime";
 
@@ -58,28 +58,12 @@ function PredictionCard({ p }) {
 }
 
 export function Predictions({ serie }) {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data, loading, error } = useApi(
+    `${API_URL}/competitions/${serie}/predictions`,
+    "Não foi possível carregar as previsões.",
+  );
+  const items = data ?? [];
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-
-    fetch(`${API_URL}/competitions/${serie}/predictions`)
-      .then((r) => {
-        if (!r.ok) throw new Error("Não foi possível carregar as previsões.");
-        return r.json();
-      })
-      .then((data) => !cancelled && setItems(data))
-      .catch((err) => !cancelled && setError(err.message))
-      .finally(() => !cancelled && setLoading(false));
-
-    return () => {
-      cancelled = true;
-    };
-  }, [serie]);
 
   if (loading) return <p className="state-message">Carregando previsões...</p>;
   if (error) return <p className="state-message error">{error}</p>;

@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useApi } from "../lib/useApi";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -59,29 +60,13 @@ function SortHeader({ column, sort, onSort }) {
 }
 
 export function TeamMetrics({ serie }) {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data, loading, error } = useApi(
+    `${API_URL}/competitions/${serie}/team-metrics`,
+    "Não foi possível carregar as métricas.",
+  );
+  const rows = data ?? [];
   const [sort, setSort] = useState({ key: "elo", dir: "desc" });
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-
-    fetch(`${API_URL}/competitions/${serie}/team-metrics`)
-      .then((r) => {
-        if (!r.ok) throw new Error("Não foi possível carregar as métricas.");
-        return r.json();
-      })
-      .then((data) => !cancelled && setRows(data))
-      .catch((err) => !cancelled && setError(err.message))
-      .finally(() => !cancelled && setLoading(false));
-
-    return () => {
-      cancelled = true;
-    };
-  }, [serie]);
 
   if (loading) return <p className="state-message">Carregando métricas...</p>;
   if (error) return <p className="state-message error">{error}</p>;

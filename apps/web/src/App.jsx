@@ -435,7 +435,7 @@ function App() {
 
         <div className="sidebar-footer">
           <button type="button" className="theme-toggle" onClick={toggleTheme}>
-            {theme === "light" ? "Tema escuro" : "Tema claro"}
+            {theme === "light" ? "Tema: claro" : "Tema: escuro"}
           </button>
           <ApiStatus />
         </div>

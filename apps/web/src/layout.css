@@ -205,3 +205,18 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: 0.01em; }
   .pred-labels { font-size: 0.7rem; }
   .round-nav select { flex: 1; min-width: 0; }
 }
+
+/* ---------- Celular estreito: menos colunas na classificação ---------- */
+
+@media (max-width: 520px) {
+  .table-scroll .standings-table { min-width: 0; }
+  .standings-table th,
+  .standings-table td { padding: 0.55rem 0.35rem; font-size: 0.8rem; }
+  .standings-table th:nth-child(n+9):nth-child(-n+11),
+  .standings-table td:nth-child(n+9):nth-child(-n+11) { display: none; }
+}
+
+/* sugere que há mais abas à direita */
+@media (max-width: 860px) {
+  .view-tabs { mask-image: linear-gradient(to right, #000 88%, transparent); }
+}

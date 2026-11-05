@@ -129,7 +129,7 @@ O workflow `.github/workflows/atualizar-dados.yml` roda todo dia às 06:00 UTC (
 - **Elo** sem regressão à média entre temporadas, e as Séries A e B têm Elo separado (quem sobe ou desce de divisão perde o rating). O Elo da aba Clubes usa só 2026; o das previsões usa o histórico desde 2020.
 - **Previsões** não consideram lesões, escalações nem odds.
 - **Horários** exibidos no fuso de Brasília; jogos manuais das Séries C e D não têm horário.
-- **Fora do escopo:** login e favoritos. Só há tema escuro.
+- **Fora do escopo:** login e favoritos.
 - **Montar tudo do zero não é um comando único:** a primeira carga exige reconciliar nomes de times na mão (ver `services/data-pipeline`).
 
 ### Testes
@@ -308,7 +308,7 @@ The workflow `.github/workflows/atualizar-dados.yml` runs every day at 06:00 UTC
 - **Elo** has no mean reversion between seasons, and Series A and B have separate Elo (a team changing division loses its rating). The Elo in the Clubs tab uses 2026 only; the one behind the predictions uses history since 2020.
 - **Predictions** do not consider injuries, line-ups or odds.
 - **Times** are shown in Brasília time; manually loaded Series C and D matches have no kick-off time.
-- **Out of scope:** login and favourites. Dark theme only.
+- **Out of scope:** login and favourites.
 - **Building everything from scratch is not a single command:** the first load requires reconciling team names by hand (see `services/data-pipeline`).
 
 ### Tests

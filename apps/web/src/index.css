@@ -64,3 +64,25 @@ button {
 table {
   font-family: inherit;
 }
+
+:root[data-theme="light"] {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-hover: #f0f2f5;
+  --border: #e2e5ea;
+  --border-strong: #cdd2d9;
+
+  --text: #14171c;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+
+  --accent: #15803d;
+  --accent-hover: #166534;
+  --accent-soft: rgba(21, 128, 61, 0.1);
+
+  --win: #16a34a;
+  --draw: #6b7280;
+  --loss: #dc2626;
+
+  color-scheme: light;
+}

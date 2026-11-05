@@ -701,3 +701,21 @@ th[style*="left"] .sort-button { justify-content: flex-start; }
   color: var(--text-secondary);
 }
 .pred-goals span { color: var(--text-muted); }
+
+/* ===== Alternar tema ===== */
+
+.theme-toggle {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.75rem;
+  padding: 0.45rem 0.6rem;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.theme-toggle:hover { background: var(--surface-hover); color: var(--text); }

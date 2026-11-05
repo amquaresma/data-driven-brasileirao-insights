@@ -20,16 +20,30 @@ const CHART_COLORS = {
   teal: "#00897b",
 };
 
-const baseOptions = {
-  responsive: true,
-  plugins: {
-    legend: { labels: { color: "#ccc" } },
-  },
-  scales: {
-    x: { ticks: { color: "#aaa", autoSkip: false, maxRotation: 90, minRotation: 45, font: { size: 11 } }, grid: { color: "#333" } },
-    y: { ticks: { color: "#aaa" }, grid: { color: "#333" } },
-  },
-};
+function cssVar(name, fallback) {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+}
+
+// Lido a cada renderização: acompanha o tema (claro ou escuro) sem cor fixa no código.
+function getBaseOptions() {
+  const text = cssVar("--text-secondary", "#aaa");
+  const grid = cssVar("--border", "#333");
+  return {
+    responsive: true,
+    aspectRatio: window.innerWidth < 640 ? 1 : 2,
+    plugins: {
+      legend: { labels: { color: text } },
+    },
+    scales: {
+      x: {
+        ticks: { color: text, autoSkip: false, maxRotation: 90, minRotation: 45, font: { size: 11 } },
+        grid: { color: grid },
+      },
+      y: { ticks: { color: text }, grid: { color: grid } },
+    },
+  };
+}
 
 export function GoalsChart({ entries }) {
   const sorted = useMemo(
@@ -58,7 +72,7 @@ export function GoalsChart({ entries }) {
       <h3>Gols marcados vs sofridos</h3>
       <Bar
         data={data}
-        options={{ ...baseOptions, plugins: { ...baseOptions.plugins, title: { display: false } } }}
+        options={{ ...getBaseOptions(), plugins: { ...getBaseOptions().plugins, title: { display: false } } }}
       />
     </div>
   );
@@ -84,7 +98,7 @@ export function EfficiencyChart({ entries }) {
   return (
     <div className="chart-card">
       <h3>Aproveitamento por time</h3>
-      <Bar data={data} options={baseOptions} />
+      <Bar data={data} options={getBaseOptions()} />
     </div>
   );
 }
@@ -111,7 +125,7 @@ export function GoalDifferenceChart({ entries }) {
   return (
     <div className="chart-card">
       <h3>Saldo de gols</h3>
-      <Bar data={data} options={baseOptions} />
+      <Bar data={data} options={getBaseOptions()} />
     </div>
   );
 }
@@ -149,10 +163,10 @@ export function ResultsDistributionChart({ entries }) {
       <Bar
         data={data}
         options={{
-          ...baseOptions,
+          ...getBaseOptions(),
           scales: {
-            x: { ...baseOptions.scales.x, stacked: true },
-            y: { ...baseOptions.scales.y, stacked: true },
+            x: { ...getBaseOptions().scales.x, stacked: true },
+            y: { ...getBaseOptions().scales.y, stacked: true },
           },
         }}
       />

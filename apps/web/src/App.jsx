@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import "./layout.css";
+import { currentTheme, applyTheme } from "./lib/theme";
 import {
   GoalsChart,
   EfficiencyChart,
@@ -128,7 +130,8 @@ function ApiStatus() {
 
 function StandingsTable({ rows }) {
   return (
-    <table className="standings-table">
+    <div className="table-scroll">
+      <table className="standings-table">
       <thead>
         <tr>
           <th>#</th>
@@ -363,10 +366,45 @@ function MatchesView({ serie }) {
   return <MatchesList matches={matches} onSelectMatch={setSelectedMatchId} />;
 }
 
+function readNav() {
+  const [s, v] = window.location.hash.replace(/^#\/?/, "").split("/");
+  return {
+    serie: SERIES.some((x) => x.code === s) ? s : "a",
+    view: VIEWS.some((x) => x.key === v) ? v : "standings",
+  };
+}
+
 function App() {
-  const [serie, setSerie] = useState("a");
-  const [view, setView] = useState("standings");
+  const [serie, setSerie] = useState(() => readNav().serie);
+  const [theme, setTheme] = useState(currentTheme);
+
+  function toggleTheme() {
+    const next = theme === "light" ? "dark" : "light";
+    applyTheme(next); // antes do setState: os gráficos leem as cores ao renderizar
+    setTheme(next);
+  }
+  const [view, setView] = useState(() => readNav().view);
   const competition = useCompetition(serie);
+
+  // o endereço reflete a série e a aba: voltar e compartilhar link funcionam
+  useEffect(() => {
+    const target = `#/${serie}/${view}`;
+    if (window.location.hash !== target) {
+      const method = window.location.hash ? "pushState" : "replaceState";
+      window.history[method](null, "", target);
+    }
+    window.scrollTo({ top: 0 });
+  }, [serie, view]);
+
+  useEffect(() => {
+    const onPop = () => {
+      const nav = readNav();
+      setSerie(nav.serie);
+      setView(nav.view);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   const currentSerieLabel = SERIES.find((s) => s.code === serie)?.label;
   const currentViewLabel = VIEWS.find((v) => v.key === view)?.label;
@@ -395,6 +433,9 @@ function App() {
         </div>
 
         <div className="sidebar-footer">
+          <button type="button" className="theme-toggle" onClick={toggleTheme}>
+            {theme === "light" ? "Tema escuro" : "Tema claro"}
+          </button>
           <ApiStatus />
         </div>
       </aside>

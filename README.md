@@ -35,6 +35,10 @@ Projeto de portfólio, feito para demonstrar engenharia de dados, modelagem rela
 | Gráficos de análise da classificação | Classificação da Série B |
 | ![Série C](assets/partidas-c.png) | ![Série D](assets/partidas-d.png) |
 | Série C: fases, quadrangulares e final | Série D: confrontos de mata-mata com ida, volta e agregado |
+| ![Página do clube](assets/clube-a.png) | ![Tema claro](assets/tema-claro-a.png) |
+| Página do clube: métricas, Elo ao longo da temporada, últimos resultados e próximos jogos com probabilidades | Tema claro, escolhido por botão e salvo no navegador |
+| ![Celular](assets/celular-a.png) | |
+| Layout responsivo no celular | |
 
 ### Destaques
 
@@ -214,6 +218,10 @@ A portfolio project built to demonstrate data engineering, relational modeling, 
 | Standings analysis charts | Series B standings |
 | ![Series C](assets/partidas-c.png) | ![Series D](assets/partidas-d.png) |
 | Series C: phases, quadrangulars and final | Series D: knockout ties with first leg, second leg and aggregate |
+| ![Club page](assets/clube-a.png) | ![Light theme](assets/tema-claro-a.png) |
+| Club page: metrics, Elo over the season, recent results and upcoming matches with probabilities | Light theme, chosen with a button and saved in the browser |
+| ![Mobile](assets/celular-a.png) | |
+| Responsive layout on mobile | |
 
 ### Highlights
 

@@ -269,3 +269,30 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: 0.01em; }
 .result-date { color: var(--text-muted); font-size: 0.78rem; white-space: nowrap; }
 .result-prob { color: var(--text-secondary); font-size: 0.75rem; white-space: nowrap; }
 .upcoming-row { flex-wrap: wrap; }
+
+/* ---------- Rodapé ---------- */
+
+.site-footer {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1.5rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.site-footer p { margin: 0; }
+.site-footer strong { color: var(--text); font-weight: 600; }
+
+.site-footer-links { display: flex; gap: 1rem; }
+.site-footer-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--text-muted);
+}
+.site-footer-links a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+.site-footer-note { flex-basis: 100%; font-size: 0.74rem; color: var(--text-muted); }

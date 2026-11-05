@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import "./layout.css";
+import { Footer } from "./components/Footer";
 import { currentTheme, applyTheme } from "./lib/theme";
 import {
   GoalsChart,
@@ -444,6 +445,7 @@ function App() {
           </WithAside>
         )}
         {view === "analytics" && <AnalyticsView serie={serie} />}
+        <Footer />
       </main>
     </div>
   );

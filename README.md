@@ -187,7 +187,7 @@ database/migrations      SQL versionado
 
 Projeto educacional, sem vínculo com CBF, ge ou Highlightly. As previsões não são recomendação de aposta.
 
-**Autor:** Matheus Quaresma ([@amquaresma](https://github.com/amquaresma))
+**Autor:** Matheus Quaresma · [GitHub](https://github.com/amquaresma) · [LinkedIn](https://www.linkedin.com/in/matheus-quaresma-/)
 
 [↑ Voltar ao topo](#top)
 
@@ -370,6 +370,6 @@ database/migrations      versioned SQL
 
 Educational project, not affiliated with CBF, ge or Highlightly. Predictions are not betting advice.
 
-**Author:** Matheus Quaresma ([@amquaresma](https://github.com/amquaresma))
+**Author:** Matheus Quaresma · [GitHub](https://github.com/amquaresma) · [LinkedIn](https://www.linkedin.com/in/matheus-quaresma-/)
 
 [↑ Back to top](#top)

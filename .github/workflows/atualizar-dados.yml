@@ -32,13 +32,13 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: services/api/requirements.txt
+          cache-dependency-path: services/requirements-pipeline.txt
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Instalar dependências
         run: |
-          pip install -r services/api/requirements.txt
+          pip install -r services/requirements-pipeline.txt
           npm ci --prefix services/data-pipeline
       - name: Classificação
         working-directory: services/data-pipeline

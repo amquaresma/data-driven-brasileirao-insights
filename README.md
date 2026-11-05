@@ -2,6 +2,8 @@
 
 # Data-Driven Brasileirão Insights
 
+[![Testes](https://github.com/amquaresma/data-driven-brasileirao-insights/actions/workflows/tests.yml/badge.svg)](https://github.com/amquaresma/data-driven-brasileirao-insights/actions/workflows/tests.yml)
+
 > 🇧🇷 **Português e inglês neste README.** Este documento tem duas versões completas. A versão em português vem primeiro; basta rolar a página para baixo para ler em inglês ([ir direto](#english)).
 >
 > 🇺🇸 **English and Portuguese in this README.** This document has two complete versions. The Portuguese one comes first; just scroll down to read it in English ([jump to it](#english)).
@@ -129,6 +131,10 @@ O workflow `.github/workflows/atualizar-dados.yml` roda todo dia às 06:00 UTC (
 - **Horários** exibidos no fuso de Brasília; jogos manuais das Séries C e D não têm horário.
 - **Fora do escopo:** login e favoritos. Só há tema escuro.
 - **Montar tudo do zero não é um comando único:** a primeira carga exige reconciliar nomes de times na mão (ver `services/data-pipeline`).
+
+### Testes
+
+`python -m pytest -q` roda testes dos cálculos (Elo, médias móveis, forma, sequências, volatilidade, momentum), das features sem vazamento (mudar o placar de um jogo nunca altera as features dele) e dos normalizadores. Também travam a consistência dos dados carregados à mão (somas de pontos, gols, vitórias e derrotas, e os classificados de cada fase do mata-mata). Não usam banco, API nem a cota da Highlightly, e rodam a cada push no GitHub Actions.
 
 ### Como rodar localmente
 
@@ -304,6 +310,10 @@ The workflow `.github/workflows/atualizar-dados.yml` runs every day at 06:00 UTC
 - **Times** are shown in Brasília time; manually loaded Series C and D matches have no kick-off time.
 - **Out of scope:** login and favourites. Dark theme only.
 - **Building everything from scratch is not a single command:** the first load requires reconciling team names by hand (see `services/data-pipeline`).
+
+### Tests
+
+`python -m pytest -q` runs tests for the calculations (Elo, rolling averages, form, streaks, volatility, momentum), for the leakage-free features (changing a match's own score never changes its features) and for the normalizers. They also lock the consistency of the hand-loaded data (points, goals, wins and losses totals, and who advances in each knockout phase). They use no database, API or Highlightly quota, and run on every push in GitHub Actions.
 
 ### Running locally
 

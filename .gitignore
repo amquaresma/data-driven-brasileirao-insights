@@ -106,3 +106,5 @@ Thumbs.db
 tmp/
 temp/
 .cache/
+# dados carregados à mão fazem parte do projeto
+!services/data-pipeline/manual/*.csv

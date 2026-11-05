@@ -21,6 +21,19 @@ Projeto de portfólio, feito para demonstrar engenharia de dados, modelagem rela
 - **API (Swagger em `/docs`):** _em breve_
 - **Repositório:** https://github.com/amquaresma/data-driven-brasileirao-insights
 
+### Telas
+
+| | |
+|---|---|
+| ![Classificação da Série A com zonas](assets/classificacao-a.png) | ![Previsões da Série A](assets/previsoes-a.png) |
+| Classificação com zonas de Libertadores, Sul-Americana e rebaixamento (vêm da fonte) | Previsões de casa/empate/fora e de 3 gols ou mais, com legenda lateral |
+| ![Métricas dos clubes](assets/clubes-a.png) | ![Partidas da Série A](assets/partidas-a.png) |
+| Métricas por clube, com ordenação por coluna | Partidas por rodada |
+| ![Análises](assets/analises-a.png) | ![Classificação da Série B](assets/classificacao-b.png) |
+| Gráficos de análise da classificação | Classificação da Série B |
+| ![Série C](assets/partidas-c.png) | ![Série D](assets/partidas-d.png) |
+| Série C: fases, quadrangulares e final | Série D: confrontos de mata-mata com ida, volta e agregado |
+
 ### Destaques
 
 - **Reconciliação de identidade entre fontes.** Os mesmos times, ligas e jogos têm IDs e grafias diferentes em cada API (`team_external_ids`, `competition_external_ids`, `match_external_ids`). Casos ambíguos foram revisados por uma pessoa, nunca adivinhados.
@@ -182,6 +195,19 @@ A portfolio project built to demonstrate data engineering, relational modeling, 
 - **Live demo:** _soon_
 - **API (Swagger at `/docs`):** _soon_
 - **Repository:** https://github.com/amquaresma/data-driven-brasileirao-insights
+
+### Screenshots
+
+| | |
+|---|---|
+| ![Series A standings with zones](assets/classificacao-a.png) | ![Series A predictions](assets/previsoes-a.png) |
+| Standings with Libertadores, Sul-Americana and relegation zones (provided by the source) | Home/draw/away and 3-or-more-goals predictions, with a side legend |
+| ![Club metrics](assets/clubes-a.png) | ![Series A matches](assets/partidas-a.png) |
+| Per-club metrics, sortable by column | Matches by round |
+| ![Analysis charts](assets/analises-a.png) | ![Series B standings](assets/classificacao-b.png) |
+| Standings analysis charts | Series B standings |
+| ![Series C](assets/partidas-c.png) | ![Series D](assets/partidas-d.png) |
+| Series C: phases, quadrangulars and final | Series D: knockout ties with first leg, second leg and aggregate |
 
 ### Highlights
 

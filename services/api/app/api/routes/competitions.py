@@ -7,6 +7,7 @@ from app.schemas.match import MatchOut
 from app.schemas.match_detail import MatchDetailOut
 from app.schemas.analytics import TeamMetricsOut
 from app.schemas.prediction import PredictionOut
+from app.schemas.team_overview import TeamOverviewOut
 from app.schemas.standings import StandingsEntryOut
 from app.schemas.team import TeamOut
 
@@ -321,3 +322,105 @@ def get_predictions(code: str):
 
     result.sort(key=lambda r: (r["match_date"] or "", r["match_time"] or ""))
     return result
+
+
+
+@router.get("/{code}/teams/{team_id}", response_model=TeamOverviewOut)
+def get_team_overview(code: str, team_id: str):
+    """
+    Visão de um time na edição mais recente da série: classificação (fase mais recente),
+    métricas, últimos 5 resultados, próximos 5 jogos (com a previsão salva) e o Elo antes
+    de cada jogo da temporada (contínuo desde 2020, o mesmo das previsões).
+    """
+    competition = _get_latest_competition(code)
+    cid = competition["id"]
+    client = get_supabase_client()
+
+    try:
+        found = client.table("teams").select("*").eq("id", team_id).limit(1).execute().data
+    except Exception:
+        found = []
+    if not found:
+        raise HTTPException(status_code=404, detail="Time não encontrado.")
+
+    rows = (
+        client.table("standings_entries")
+        .select("*, group:groups(name), phase:phases(name, phase_order)")
+        .eq("competition_id", cid)
+        .eq("team_id", team_id)
+        .execute()
+        .data
+    )
+    standing = None
+    if rows:
+        rows.sort(key=lambda r: -((r.get("phase") or {}).get("phase_order") or 0))
+        r = rows[0]
+        standing = {
+            **{k: r.get(k) for k in (
+                "position", "points", "matches_played", "wins", "draws", "losses",
+                "goals_for", "goals_against", "goal_difference", "legend",
+            )},
+            "group_name": (r.get("group") or {}).get("name"),
+            "phase_name": (r.get("phase") or {}).get("name"),
+        }
+
+    metrics = next((m for m in get_team_metrics(code) if m["team"]["id"] == team_id), None)
+
+    select = (
+        "*, home_team:teams!matches_home_team_id_fkey(*), "
+        "away_team:teams!matches_away_team_id_fkey(*)"
+    )
+    mine = f"home_team_id.eq.{team_id},away_team_id.eq.{team_id}"
+
+    recent = (
+        client.table("matches").select(select)
+        .eq("competition_id", cid).or_(mine)
+        .ilike("status", "%finish%")
+        .not_.is_("home_score", "null").not_.is_("match_date", "null")
+        .order("match_date", desc=True).limit(5)
+        .execute().data
+    )
+
+    upcoming = (
+        client.table("matches").select(select)
+        .eq("competition_id", cid).or_(mine)
+        .ilike("status", "%not started%").not_.is_("date_time", "null")
+        .order("date_time").limit(5)
+        .execute().data
+    )
+    ids = [m["id"] for m in upcoming]
+    preds: dict[str, dict] = {}
+    if ids:
+        for row in (
+            client.table("match_predictions")
+            .select("match_id, p_home, p_draw, p_away, p_over_2_5, generated_at")
+            .in_("match_id", ids).order("generated_at", desc=True)
+            .execute().data
+        ):
+            preds.setdefault(row["match_id"], row)
+    for m in upcoming:
+        pr = preds.get(m["id"])
+        if pr:
+            m.update({k: pr[k] for k in ("p_home", "p_draw", "p_away", "p_over_2_5")})
+
+    feats = (
+        client.table("match_features")
+        .select("match_date, home_team_id, home_elo, away_elo")
+        .eq("competition_id", cid).or_(mine)
+        .order("match_date")
+        .execute().data
+    )
+    elo_series = []
+    for f in feats:
+        elo = f["home_elo"] if f["home_team_id"] == team_id else f["away_elo"]
+        if elo is not None:
+            elo_series.append({"match_date": f["match_date"], "elo": elo})
+
+    return {
+        "team": found[0],
+        "standing": standing,
+        "metrics": metrics,
+        "recent": recent,
+        "upcoming": upcoming,
+        "elo_series": elo_series,
+    }

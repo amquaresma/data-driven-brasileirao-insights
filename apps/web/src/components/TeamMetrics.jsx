@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useApi } from "../lib/useApi";
+import { TeamPage } from "./TeamPage";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -66,6 +67,9 @@ export function TeamMetrics({ serie }) {
   );
   const rows = data ?? [];
   const [sort, setSort] = useState({ key: "elo", dir: "desc" });
+  const [teamId, setTeamId] = useState(null);
+
+  if (teamId) return <TeamPage serie={serie} teamId={teamId} onBack={() => setTeamId(null)} />;
 
 
   if (loading) return <p className="state-message">Carregando métricas...</p>;
@@ -111,7 +115,9 @@ export function TeamMetrics({ serie }) {
                 {r.team.badge_url && (
                   <img src={r.team.badge_url} alt="" width="20" height="20" loading="lazy" />
                 )}
-                {r.team.name}
+                <button type="button" className="link-button" onClick={() => setTeamId(r.team.id)}>
+                  {r.team.name}
+                </button>
               </td>
               <td>{num(r.elo, 0)}</td>
               <td><Trend value={r.momentum_score} /></td>

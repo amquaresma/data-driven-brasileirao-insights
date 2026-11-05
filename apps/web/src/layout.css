@@ -220,3 +220,52 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: 0.01em; }
 @media (max-width: 860px) {
   .view-tabs { mask-image: linear-gradient(to right, #000 88%, transparent); }
 }
+
+/* ---------- Página do clube ---------- */
+
+.link-button {
+  all: unset;
+  cursor: pointer;
+  border-bottom: 1px dotted var(--text-muted);
+}
+.link-button:hover { color: var(--accent); border-bottom-color: var(--accent); }
+.link-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.team-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.team-name { font-size: 2rem; line-height: 1.05; margin: 0; }
+.team-summary { margin: 0.3rem 0 0; font-size: 0.85rem; }
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.6rem;
+}
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.7rem 0.8rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.metric-label { font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
+.metric-value { font-family: var(--font-display); font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+
+.team-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+@media (max-width: 760px) { .team-lists { grid-template-columns: 1fr; } }
+
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.result-opp { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.result-score { font-weight: 600; }
+.result-date { color: var(--text-muted); font-size: 0.78rem; white-space: nowrap; }
+.result-prob { color: var(--text-secondary); font-size: 0.75rem; white-space: nowrap; }
+.upcoming-row { flex-wrap: wrap; }

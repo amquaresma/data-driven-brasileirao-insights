@@ -18,7 +18,6 @@ Plataforma full stack de análise do futebol brasileiro (Séries A, B, C e D). R
 
 Projeto de portfólio, feito para demonstrar engenharia de dados, modelagem relacional, estatística, Machine Learning e desenvolvimento full stack.
 
-<!-- TODO: trocar "em breve" pelos links depois do deploy -->
 - **Demo ao vivo:** https://brasileirao-insights.vercel.app
 - **API (Swagger em `/docs`):** https://data-driven-brasileirao-insights.vercel.app/docs
 - **Repositório:** https://github.com/amquaresma/data-driven-brasileirao-insights
@@ -201,7 +200,6 @@ A full stack analytics platform for Brazilian football (Series A, B, C and D). I
 
 A portfolio project built to demonstrate data engineering, relational modeling, statistics, Machine Learning and full stack development.
 
-<!-- TODO: replace "soon" with the links after deploying -->
 - **Live demo:** https://brasileirao-insights.vercel.app
 - **API (Swagger at `/docs`):** https://data-driven-brasileirao-insights.vercel.app/docs
 - **Repository:** https://github.com/amquaresma/data-driven-brasileirao-insights
